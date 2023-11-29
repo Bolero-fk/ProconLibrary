@@ -10,14 +10,13 @@ int main()
     long long N, A, B;
     cin >> N >> A >> B;
 
-    PrimesEnumerator primesEnumerator(N);
-
-    long long piN = primesEnumerator.primes.size();
+    vector<long long> primes = enumerate_primes(N);
+    long long piN = primes.size();
 
     vector<long long> ps;
     for (int i = B; i < piN; i += A)
     {
-        ps.push_back(primesEnumerator.primes[i]);
+        ps.push_back(primes[i]);
     }
 
     long long X = ps.size();
