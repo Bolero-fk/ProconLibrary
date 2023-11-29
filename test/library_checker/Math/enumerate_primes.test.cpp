@@ -8,7 +8,6 @@ using namespace std;
 int main()
 {
     long long N, A, B;
-
     cin >> N >> A >> B;
 
     PrimesEnumerator primesEnumerator(N);
