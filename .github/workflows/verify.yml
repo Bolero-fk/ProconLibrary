@@ -24,15 +24,6 @@ jobs:
         git submodule init
         git submodule update --remote
 
-    - name: Check Submodules
-      run: git submodule status
-
-    - name: Check Directory
-      run: ls -a
-
-    - name: Check Directory2
-      run: ls ./ac-library/ -a
-
     - name: Install dependencies
       run: pip3 install -U online-judge-verify-helper
 
