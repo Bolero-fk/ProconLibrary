@@ -19,6 +19,9 @@ jobs:
         python-version: '3.9'
         check-latest: true
 
+    - name: Update Submodules
+      run: git submodule update --remote
+
     - name: Install dependencies
       run: pip3 install -U online-judge-verify-helper
 
