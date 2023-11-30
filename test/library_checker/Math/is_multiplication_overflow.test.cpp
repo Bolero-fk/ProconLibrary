@@ -15,6 +15,7 @@ int main()
     {
         cin >> A[i];
     }
+    sort(A.begin(), A.end());
 
     long long LIMIT = 1000000000000000000;
     long long ans = 1;
