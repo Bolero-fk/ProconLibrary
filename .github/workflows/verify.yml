@@ -19,9 +19,15 @@ jobs:
         python-version: '3.9'
         check-latest: true
 
-    - name: Update Submodules
-      run: git submodule update --remote --recursive
+    - name: Check Submodules
+      run: git submodule status
 
+    - name: Update Submodules
+      run: git submodule update --remote
+
+    - name: Check Submodules
+      run: git submodule status
+      
     - name: Check Directory
       run: ls -a
 
