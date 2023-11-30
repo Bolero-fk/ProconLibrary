@@ -20,7 +20,7 @@ jobs:
         check-latest: true
 
     - name: Update Submodules
-      run: git submodule update --remote
+      run: git submodule update --remote --recursive
 
     - name: Check Directory
       run: ls -a
