@@ -20,7 +20,7 @@ jobs:
         check-latest: true
 
     - name: Update Submodules
-      run: git submodule update --remote
+      run: git submodule update --remote ac-library
 
     - name: Install dependencies
       run: pip3 install -U online-judge-verify-helper
