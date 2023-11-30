@@ -7,7 +7,7 @@ mint sum_of_geometric_sequence(mint a, mint r, long long n)
 
     mint x = sum_of_geometric_sequence(a, r, n / 2);
 
-    mint ret = x + r.pow(n / 2);
+    mint ret = x + r.pow(n / 2) * x;
     if (n & 1)
         ret = (a + r * ret);
     return ret;
