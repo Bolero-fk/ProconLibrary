@@ -1,6 +1,6 @@
 # dropbox tokenの取得について
 基本的には ```oj d --system https://atcoder.jp/contests/agc001/tasks/agc001_a``` を実行して表示される出力に従い、ACCESS_TOKENを取得すればよい。  
-ただし、ojのバージョンが古い場合、誤ったURLが出力されることがあるので注意が必要。  
+ただし、誤ったURLが出力されることがあるので注意が必要。  
 以下が正しい実行手順
 https://github.com/online-judge-tools/oj/pull/914/commits/31cb8040f16107111468067bacb5d7450714bcbe
 1. Open the following URL in your browser:
