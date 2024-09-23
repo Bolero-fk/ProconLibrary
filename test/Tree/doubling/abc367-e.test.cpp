@@ -32,7 +32,11 @@ int main()
 
     for (int i = 0; i < N; i++)
     {
-        cout << A[X[i]] << " ";
+        cout << A[X[i]];
+        if (i != N - 1)
+        {
+            cout << " ";
+        }
     }
     cout << endl;
 
