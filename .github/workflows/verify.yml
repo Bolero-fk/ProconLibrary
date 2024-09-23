@@ -2,9 +2,10 @@ name: verify
 
 on:
   push:
-    branches:
-    - main
-  pull_request:
+    paths:
+      - '**.cpp'
+      - '**.hpp'
+  workflow_dispatch:
 
 jobs:
   verify:
