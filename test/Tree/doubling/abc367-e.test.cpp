@@ -23,9 +23,16 @@ int main()
         cin >> A[i];
     }
 
+    auto forwared_X = graph.step_forwards(K);
+
     for (int i = 0; i < N; i++)
     {
-        cout << A[graph.step_forward(i, K).first] << " ";
+        X[i] = forwared_X[i].first;
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        cout << A[X[i]] << " ";
     }
     cout << endl;
 

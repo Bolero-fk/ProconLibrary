@@ -13,7 +13,7 @@ class Doubling
 public:
     Doubling(int N, unsigned long long max_k) : N(N)
     {
-        L = bit_width(max_k);
+        L = max<int>(bit_width(max_k), 1);
         nexts = vector<pair<int, T>>(N, {-1, 0});
         parents = vector<vector<pair<int, T>>>(N + 1, vector<pair<int, T>>(L, {-1, 0}));
     }
@@ -68,5 +68,36 @@ public:
         }
 
         return pair(v, sum_cost);
+    }
+
+    vector<pair<int, T>> step_forwards(unsigned long long k)
+    {
+        if (!done_initialized)
+        {
+            init();
+        }
+
+        vector<pair<int, T>> result(N);
+        for (int i = 0; i < N; i++)
+        {
+            result[i].first = i;
+        }
+
+        for (int i = L - 1; i >= 0; --i)
+        {
+            unsigned long long len = 1ull << i;
+            if (k >= len)
+            {
+                for (int j = 0; j < N; j++)
+                {
+                    int v = result[j].first;
+                    result[j].first = parents[v][i].first, result[j].second += parents[v][i].second;
+                }
+
+                k -= len;
+            }
+        }
+
+        return result;
     }
 };
