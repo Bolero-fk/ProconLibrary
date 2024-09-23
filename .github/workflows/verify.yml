@@ -25,10 +25,10 @@ jobs:
         git submodule update --remote
 
     - name: Install dependencies
-      run: | 
-        pip3 install -U online-judge-verify-helper
-        oj -v
-        oj d --system https://atcoder.jp/contests/agc001/tasks/agc001_a
+      run: pip3 install -U online-judge-verify-helper
+
+    - name: Test
+      run: oj d --system https://atcoder.jp/contests/agc001/tasks/agc001_a
 
     - name: Run tests
       env:
