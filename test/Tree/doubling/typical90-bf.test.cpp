@@ -1,4 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/typical90/tasks/typical90_bf
+// competitive-verifier: IGNORE
+// testcase id is different from url
 
 #include <Tree/doubling.hpp>
 #include <bits/stdc++.h>
