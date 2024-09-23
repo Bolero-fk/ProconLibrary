@@ -1,4 +1,4 @@
-#define PROBLEM "https://atcoder.jp/contests/typical90/tasks/typical90_bf"
+// competitive-verifier: PROBLEM https://atcoder.jp/contests/typical90/tasks/typical90_bf
 
 #include <Tree/doubling.hpp>
 #include <bits/stdc++.h>

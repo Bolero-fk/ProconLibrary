@@ -1,4 +1,4 @@
-#define PROBLEM "https://atcoder.jp/contests/abc367/tasks/abc367_e"
+// competitive-verifier: PROBLEM https://atcoder.jp/contests/abc367/tasks/abc367_e
 
 #include <Tree/doubling.hpp>
 #include <bits/stdc++.h>
