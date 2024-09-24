@@ -1,6 +1,6 @@
 // competitive-verifier: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP1_3_D
 
-#include <Math/enumerate_divisor.hpp>
+#include "Math/enumerate_divisor.hpp"
 #include <bits/stdc++.h>
 
 using namespace std;

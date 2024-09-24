@@ -1,6 +1,6 @@
 // competitive-verifier: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=NTL_1_A
 
-#include <Math/prime_factorize.hpp>
+#include "Math/prime_factorize.hpp"
 #include <bits/stdc++.h>
 
 using namespace std;
