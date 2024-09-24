@@ -19,6 +19,8 @@ concurrency:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      dropbox_token: ${{steps.set_dropbox_token.outputs.dropbox_token}}
     steps:
       - uses: actions/checkout@v4
 
@@ -59,6 +61,24 @@ jobs:
           path: .competitive-verifier/bundled
           retention-days: 1
 
+      - name: Set dropbox token
+        id: set_dropbox_token
+        run: |
+          DROPBOX_TOKEN=$( \
+            curl https://api.dropbox.com/oauth2/token \
+              -d grant_type=refresh_token \
+              -d refresh_token=$DROPBOX_REFRESH_TOKEN \
+              -u $DROPBOX_APP_KEY:$DROPBOX_APP_SECRET \
+            | jq -r '.["access_token"]' \
+          )
+          echo "::add-mask::$DROPBOX_TOKEN"
+          DROPBOX_TOKEN_ENC=$(echo "$DROPBOX_TOKEN" | openssl enc -aes256 -e -pbkdf2 -base64 -A -k '${{secrets.AES256_KEY}}')
+          echo "dropbox_token=$DROPBOX_TOKEN_ENC" >> $GITHUB_OUTPUT
+        env:
+          DROPBOX_APP_KEY: ${{secrets.DROPBOX_APP_KEY}}
+          DROPBOX_APP_SECRET: ${{secrets.DROPBOX_APP_SECRET}}
+          DROPBOX_REFRESH_TOKEN: ${{secrets.DROPBOX_REFRESH_TOKEN}}
+
   verify:
     runs-on: ubuntu-latest
     needs: [setup]
@@ -72,6 +92,12 @@ jobs:
            "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Recieve dropbox token
+        run: |
+          DROPBOX_TOKEN=$(echo "${{needs.setup.outputs.dropbox_token}}" | openssl enc -aes256 -d -pbkdf2 -base64 -A -k '${{secrets.AES256_KEY}}')
+          echo "::add-mask::$DROPBOX_TOKEN"
+          echo "DROPBOX_TOKEN=$DROPBOX_TOKEN" >> $GITHUB_ENV
 
       - name: Download verify_files.json
         uses: competitive-verifier/actions/download-verify-artifact@v2
@@ -95,7 +121,6 @@ jobs:
           timeout: 1800
         env:
           YUKICODER_TOKEN: ${{secrets.YUKICODER_TOKEN}}
-          DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }}
 
       - name: Upload result artifact
         uses: actions/upload-artifact@v4
