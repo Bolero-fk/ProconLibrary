@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#include <Heuristic/fast_random_engine.hpp>
+#include <./fast_random_engine.hpp>
 
 // 参考 https://future-architect.github.io/articles/20211201a/
 template <typename T>
