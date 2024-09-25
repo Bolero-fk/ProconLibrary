@@ -48,14 +48,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
+      - name: Decide verification target files
+        run: |
+          include_files=$(jq -r '.files | keys[]' ./.artifacts/previous.json)
+          include_files_list=$(echo $include_files | tr '\n' ' ')
+          echo "Running oj-resolve with include files: $include_files_list"
+          echo "INCLUDE_FILES_LIST=$include_files_list" >> $GITHUB_ENV
+      
       # Initialize your own environment for resolving.
       - name: oj-resolve
         uses: competitive-verifier/actions/oj-resolve@v2
         with:
           output-path: verify_files.json
           # Specify patterns
-          include: test/Math/*
-          # exclude: your-own-exclude/
+          include: ${{ env.INCLUDE_FILES_LIST }}
+          exclude: test/Math/enumerate_primes/*
           # If you have config.toml
           config: .verify-helper/config.toml
       - name: parse-doxygen
