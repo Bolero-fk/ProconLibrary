@@ -210,27 +210,7 @@ jobs:
         run: |
           ARTIFACTS_ROOT=$(find "${{ steps.all-artifacts.outputs.artifacts-root }}" -type d -name "Result-*" ! -name "Result-previous")
           JSON_FILES=$(find $ARTIFACTS_ROOT -name "result.json")
-
-          jq -s '
-            reduce .[] as $item (
-              {
-                "total_seconds": 0,
-                "files": {}
-              };
-              {
-                "total_seconds": (.total_seconds + $item.total_seconds),
-                "files": ( .files + $item.files | to_entries | 
-                  group_by(.key) | 
-                  map({
-                    key: .[0].key, 
-                    value: {
-                      verifications: (reduce .[].value.verifications[] as $verification ([]; . + [$verification])),
-                      newest: true
-                    }
-                  }) | from_entries)
-              }
-            )
-          ' $JSON_FILES > ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
+          python3 ./scripts/merge_json_files.py $JSON_FILES > ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
 
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
@@ -246,6 +226,7 @@ jobs:
         with:
           source: _jekyll
           destination: _site
+
       - name: Upload artifact
         id: upload-pages
         uses: actions/upload-pages-artifact@v3
