@@ -170,12 +170,34 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          ls ./.competitive-verifier
+          ARTIFACTS_ROOT="${{ steps.all-artifacts.outputs.artifacts-root }}/Result-*"
+          JSON_FILES=$(find $ARTIFACTS_ROOT -name "result.json")
+
+          jq -s '
+            reduce .[] as $item (
+              {
+                "total_seconds": 0,
+                "files": {}
+              };
+              {
+                "total_seconds": (.total_seconds + $item.total_seconds),
+                "files": ( .files + $item.files | to_entries | 
+                  group_by(.key) | 
+                  map({
+                    key: .[0].key, 
+                    value: {
+                      verifications: (reduce .[].value.verifications[] as $verification ([]; . + [$verification])),
+                      newest: false
+                    }
+                  }) | from_entries)
+              }
+            )
+          ' $JSON_FILES > ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
 
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
         with:
-          verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/Result-*/result.json
+          verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
           destination: _jekyll
           write-summary: true
 
@@ -195,7 +217,7 @@ jobs:
       - name: Check
         uses: competitive-verifier/actions/check@v2
         with:
-          verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/Result-*/result.json
+          verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
   deploy:
     if: (success() || failure()) && github.ref == 'refs/heads/main' && needs.docs-and-check.outputs.upload-pages == 'true'
     needs: docs-and-check
