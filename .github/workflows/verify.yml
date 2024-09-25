@@ -167,7 +167,7 @@ jobs:
         with:
           cache-pip: true
 
-      - name: Test
+      - name: Bundle test result
         shell: bash
         run: |
           ARTIFACTS_ROOT="${{ steps.all-artifacts.outputs.artifacts-root }}/Result-*"
@@ -218,6 +218,14 @@ jobs:
         uses: competitive-verifier/actions/check@v2
         with:
           verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
+
+      - name: Upload cache result
+        uses: actions/upload-artifact@v4
+        with:
+          name: Result-cache
+          path: ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
+          retention-days: 90
+
   deploy:
     if: (success() || failure()) && github.ref == 'refs/heads/main' && needs.docs-and-check.outputs.upload-pages == 'true'
     needs: docs-and-check
