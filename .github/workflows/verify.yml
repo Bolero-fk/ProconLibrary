@@ -38,7 +38,7 @@ jobs:
         with:
           output-path: verify_files.json
           # Specify patterns
-          # include: your-own-include/
+          include: test/Math/*
           # exclude: your-own-exclude/
           # If you have config.toml
           config: .verify-helper/config.toml
@@ -166,6 +166,11 @@ jobs:
         uses: competitive-verifier/actions/setup@v2
         with:
           cache-pip: true
+
+      - name: Test
+        shell: bash
+        run: |
+          ls ./.competitive-verifier
 
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
