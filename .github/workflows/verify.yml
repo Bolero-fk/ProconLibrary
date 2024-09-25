@@ -216,7 +216,9 @@ jobs:
         shell: bash
         run: |
           python3 ./scripts/merge_json_files.py ${{ steps.all-artifacts.outputs.artifacts-root }}/Result-previous/result.json ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json > ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
-          # jq '.files |= with_entries(.value.newest = false)' ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json > ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
+          jq '{total_seconds: 0} + .' "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json" > "${{ steps.all-artifacts.outputs.artifacts-root }}/temp_cache.json"
+          mv "${{ steps.all-artifacts.outputs.artifacts-root }}/temp_cache.json" "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json"
+          cat "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json"
 
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
