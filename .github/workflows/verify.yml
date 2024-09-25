@@ -31,24 +31,38 @@ jobs:
         uses: competitive-verifier/actions/setup@v2
         with:
           cache-pip: true
-      
       - name: Download previous verify result
         run: |
-          workflow_ids=$(gh run list --workflow verify --branch ${{ github.ref_name }} --limit 100 --json databaseId -q '.[].databaseId')
+          workflow_ids=$(gh run list --workflow verify --limit 100 --json databaseId -q '.[].databaseId')
           for workflow_id in $workflow_ids; do
             # Try download Result-cache
-            if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1; then
+            if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1;then
               if [ -f "./.artifacts/merge.json" ]; then
-                mv ./.artifacts/merge.json ./.artifacts/previous.json
+                mv ./.artifacts/merge.json ./.artifacts/previous_result.json
                 commit_sha=$(gh run view $workflow_id --json headSha -q '.headSha')
                 echo "COMMIT_SHA=$commit_sha" >> $GITHUB_ENV
                 exit 0
+              else
+                rm -rf ./.artifacts
               fi
+            else
+              rm -rf ./.artifacts
             fi
           done
           echo "No Result-cache artifact found in the recent verify runs."
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+
+      # ToDo Remove
+      - name: oj-resolve
+        uses: competitive-verifier/actions/oj-resolve@v2
+        with:
+          output-path: previous_verify_files.json
+          # Specify patterns 
+          # include:  ${{ env.INCLUDE_FILES_LIST }}
+          exclude: scripts/*
+          # If you have config.toml
+          config: .verify-helper/config.toml
 
       - name: Extracrt test file
         run: |
@@ -60,13 +74,21 @@ jobs:
 
       - name: Filter previous.json
         run: |
-          python3 ./scripts/filter_test_files_from_json.py "./.artifacts/previous.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/result.json
+          python3 ./scripts/filter_test_files_from_json.py "./.artifacts/previous_result.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/result.json
+          python3 ./scripts/filter_test_files_from_json.py "./previous_verify_files.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/previous_verify_files.json
 
       - name: Upload Result-previous
         uses: actions/upload-artifact@v4
         with:
           name: Result-previous
           path: ./.artifacts/result.json
+          retention-days: 1
+
+      - name: Upload Result-previous
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-files-previous
+          path: ./.artifacts/previous_verify.json
           retention-days: 1
 
       # Initialize your own environment for resolving.
@@ -89,6 +111,7 @@ jobs:
         uses: competitive-verifier/actions/upload-verify-artifact@v2
         with:
           file: verify_files.json
+          retention-days: 90
 
       - name: Check bundled
         id: test-bundled

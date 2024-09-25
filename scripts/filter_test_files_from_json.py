@@ -1,7 +1,25 @@
 import json
 import sys
+import os
 
 def update_previous_json(json_path, include_files_list):
+    # ファイルの存在とサイズを確認
+    if not os.path.exists(json_path):
+        print(f"Error: JSON file {json_path} does not exist.")
+        sys.exit(1)
+
+    if os.path.getsize(json_path) == 0:
+        print(f"Error: JSON file {json_path} is empty.")
+        sys.exit(1)
+
+    # previous.jsonを読み込む
+    with open(json_path, 'r') as file:
+        try:
+            previous_data = json.load(file)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+            sys.exit(1)
+
     # previous.jsonを読み込む
     with open(json_path, 'r') as file:
         previous_data = json.load(file)
@@ -11,8 +29,6 @@ def update_previous_json(json_path, include_files_list):
 
     # 更新したデータを保存
     previous_data['files'] = updated_files
-    with open(json_path, 'w') as file:
-        json.dump(previous_data, file, indent=2)
 
     # 結果の確認
     print(json.dumps(previous_data, indent=2))
