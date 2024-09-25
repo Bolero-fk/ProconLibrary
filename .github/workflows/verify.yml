@@ -26,7 +26,7 @@ jobs:
       dropbox_token: ${{steps.set_dropbox_token.outputs.dropbox_token}}
     steps:
       - uses: actions/checkout@v4
-
+          
       - name: Set up competitive-verifier
         uses: competitive-verifier/actions/setup@v2
         with:
@@ -34,7 +34,7 @@ jobs:
       
       - name: Download previous verify result
         run: |
-          workflow_ids=$(gh run list --workflow verify --limit 10 --json databaseId -q '.[].databaseId')
+          workflow_ids=$(gh run list --workflow verify --branch ${{ github.ref_name }} --limit 10 --json databaseId -q '.[].databaseId')
           for workflow_id in $workflow_ids; do
             # Result-cacheアーティファクトを試してダウンロード（失敗しても続行）
             if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1; then
@@ -50,24 +50,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
-      - name: Decide verification target files
+      - name: Decide no verification target files
         run: |
-          include_files=$(jq -r '.files | keys[]' ./.artifacts/previous.json)
-          include_files_list=$(echo $include_files | tr '\n' ' ')
+          echo "using commit id: ${{ env.COMMIT_SHA }}"
+          git fetch origin ${{ env.COMMIT_SHA }}
+      
+          previous_verification_files=$(jq -r '.files | keys[]' ./.artifacts/previous.json)
+          previous_verification_file_list=$(echo $previous_verification_files | tr '\n' ' ')
 
-          filtered_files=""
-          for file in $include_files_list; do
-            # commit_shaと現在の状態の差分を確認
-            if git diff --quiet $commit_sha $file; then
-              filtered_files="$filtered_files $file"
+          exclude_files_list=""
+          for file in $previous_verification_file_list; do
+            if git diff --quiet ${{ env.COMMIT_SHA }} $file; then
+              echo "no contains diff" $file
+              exclude_files_list="$exclude_files_list $file"
+            else
+              echo "contains diff" $file
             fi
           done
-
-          # フィルタリング後のファイルリストを出力
-          echo "Filtered files with no diff: $filtered_files"
-
-          echo "Running oj-resolve with include files: $include_files_list"
-          echo "INCLUDE_FILES_LIST=$include_files_list" >> $GITHUB_ENV
+          echo "exclude: $exclude_files_list"
+          echo "EXCLUDE_FILES_LIST=$exclude_files_list" >> $GITHUB_ENV
       
       # Initialize your own environment for resolving.
       - name: oj-resolve
@@ -75,10 +76,11 @@ jobs:
         with:
           output-path: verify_files.json
           # Specify patterns
-          include: ${{ env.INCLUDE_FILES_LIST }}
-          exclude: test/Math/enumerate_primes/*
+          # include: ${{ env.INCLUDE_FILES_LIST }}
+          exclude: ${{ env.EXCLUDE_FILES_LIST }}
           # If you have config.toml
           config: .verify-helper/config.toml
+
       - name: parse-doxygen
         uses: competitive-verifier/actions/parse-doxygen@v2
         with:
