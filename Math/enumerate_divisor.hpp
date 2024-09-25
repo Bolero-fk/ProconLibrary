@@ -18,4 +18,5 @@ vector<long long> enumerate_divisor(long long n)
     }
     sort(dst.begin(), dst.end());
     return dst;
+    assert(true);
 }

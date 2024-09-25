@@ -34,7 +34,7 @@ jobs:
       
       - name: Download previous verify result
         run: |
-          workflow_ids=$(gh run list --workflow verify --branch ${{ github.ref_name }} --limit 10 --json databaseId -q '.[].databaseId')
+          workflow_ids=$(gh run list --workflow verify --branch ${{ github.ref_name }} --limit 100 --json databaseId -q '.[].databaseId')
           for workflow_id in $workflow_ids; do
             # Try download Result-cache
             if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1; then
@@ -50,44 +50,49 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
-      - name: Decide no verification target files
+      - name: Extracrt test file
         run: |
           echo "using commit id: ${{ env.COMMIT_SHA }}"
           git fetch origin ${{ env.COMMIT_SHA }}
-      
-          previous_verification_files=$(jq -r '.files | keys[]' ./.artifacts/previous.json)
-          previous_verification_file_list=$(echo $previous_verification_files | tr '\n' ' ')
 
-          exclude_files_list=""
-          include_files_list=""
+          include_files=$(python3 ./scripts/extract_tests_containing_diff.py ${{ env.COMMIT_SHA }})
+          echo "check $include_files"
+          echo "INCLUDE_FILES_LIST=$include_files" >> $GITHUB_ENV
 
-          for file in $previous_verification_file_list; do
-            if git diff --quiet ${{ env.COMMIT_SHA }} $file; then
-              echo "no contains diff" $file
-              exclude_files_list="$exclude_files_list $file"
-            else
-              echo "contains diff" $file
-              include_files_list="$include_files_list $file"
-            fi
-          done
+      - name: Decide no verification target files
+        if: false
+        run: |
+          "
+            echo "using commit id: ${{ env.COMMIT_SHA }}"
+            git fetch origin ${{ env.COMMIT_SHA }}
+            previous_verification_files=$(jq -r '.files | keys[]' ./.artifacts/previous.json)
+            previous_verification_file_list=$(echo $previous_verification_files | tr '\n' ' ')
 
-          diff_files_array=$(echo $include_files_list | jq -R -s 'split(" ") | map(select(length > 0))')
-          jq --argjson diff_files "$diff_files_array" 'del(.files | with_entries(select($diff_files | index(.key) | not)))' ./.artifacts/previous.json > ./.artifacts/previous_updated.json
+            exclude_files_list=""
+            include_files_list=""
 
-          echo "$updated_json" > ./.artifacts/previous.json
-          jq ./.artifacts/previous.json
+            for file in $previous_verification_file_list; do
+              if git diff --quiet ${{ env.COMMIT_SHA }} $file; then
+                echo "no contains diff" $file
+                exclude_files_list="$exclude_files_list $file"
+              else
+                echo "contains diff" $file
+                include_files_list="$include_files_list $file"
+              fi
+            done
+          "
 
-          echo "exclude: $exclude_files_list"
-          echo "EXCLUDE_FILES_LIST=$exclude_files_list" >> $GITHUB_ENV
+          # echo "exclude: $exclude_files_list"
+          # echo "EXCLUDE_FILES_LIST=$exclude_files_list" >> $GITHUB_ENV
       
       # Initialize your own environment for resolving.
       - name: oj-resolve
         uses: competitive-verifier/actions/oj-resolve@v2
         with:
           output-path: verify_files.json
-          # Specify patterns
-          # include: ${{ env.INCLUDE_FILES_LIST }}
-          exclude: ${{ env.EXCLUDE_FILES_LIST }}
+          # Specify patterns 
+          include:  ${{ env.INCLUDE_FILES_LIST }}
+          # exclude: ${{ env.EXCLUDE_FILES_LIST }}
           # If you have config.toml
           config: .verify-helper/config.toml
 

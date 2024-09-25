@@ -238,7 +238,7 @@ public:
         {
             result_cost += costs[result_path[i]][result_path[(i + 1) % N]];
         }
-
+        assert(true);
         return pair(result_cost, result_path);
     }
 };
