@@ -56,35 +56,19 @@ jobs:
           git fetch origin ${{ env.COMMIT_SHA }}
 
           include_files=$(python3 ./scripts/extract_tests_containing_diff.py ${{ env.COMMIT_SHA }})
-          echo "check $include_files"
           echo "INCLUDE_FILES_LIST=$include_files" >> $GITHUB_ENV
 
-      - name: Decide no verification target files
-        if: false
+      - name: Filter previous.json
         run: |
-          "
-            echo "using commit id: ${{ env.COMMIT_SHA }}"
-            git fetch origin ${{ env.COMMIT_SHA }}
-            previous_verification_files=$(jq -r '.files | keys[]' ./.artifacts/previous.json)
-            previous_verification_file_list=$(echo $previous_verification_files | tr '\n' ' ')
+          python3 ./scripts/filter_test_files_from_json.py "./.artifacts/previous.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/result.json
 
-            exclude_files_list=""
-            include_files_list=""
+      - name: Upload Result-previous
+        uses: actions/upload-artifact@v4
+        with:
+          name: Result-previous
+          path: ./.artifacts/result.json
+          retention-days: 1
 
-            for file in $previous_verification_file_list; do
-              if git diff --quiet ${{ env.COMMIT_SHA }} $file; then
-                echo "no contains diff" $file
-                exclude_files_list="$exclude_files_list $file"
-              else
-                echo "contains diff" $file
-                include_files_list="$include_files_list $file"
-              fi
-            done
-          "
-
-          # echo "exclude: $exclude_files_list"
-          # echo "EXCLUDE_FILES_LIST=$exclude_files_list" >> $GITHUB_ENV
-      
       # Initialize your own environment for resolving.
       - name: oj-resolve
         uses: competitive-verifier/actions/oj-resolve@v2
@@ -224,7 +208,7 @@ jobs:
       - name: Bundle verification result
         shell: bash
         run: |
-          ARTIFACTS_ROOT="${{ steps.all-artifacts.outputs.artifacts-root }}/Result-*"
+          ARTIFACTS_ROOT=$(find "${{ steps.all-artifacts.outputs.artifacts-root }}" -type d -name "Result-*" ! -name "Result-previous")
           JSON_FILES=$(find $ARTIFACTS_ROOT -name "result.json")
 
           jq -s '
