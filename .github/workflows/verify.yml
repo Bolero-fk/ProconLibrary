@@ -36,7 +36,7 @@ jobs:
         run: |
           workflow_ids=$(gh run list --workflow verify --branch ${{ github.ref_name }} --limit 10 --json databaseId -q '.[].databaseId')
           for workflow_id in $workflow_ids; do
-            # Result-cacheアーティファクトを試してダウンロード（失敗しても続行）
+            # Try download Result-cache
             if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1; then
               if [ -f "./.artifacts/merge.json" ]; then
                 mv ./.artifacts/merge.json ./.artifacts/previous.json
@@ -59,14 +59,24 @@ jobs:
           previous_verification_file_list=$(echo $previous_verification_files | tr '\n' ' ')
 
           exclude_files_list=""
+          include_files_list=""
+
           for file in $previous_verification_file_list; do
             if git diff --quiet ${{ env.COMMIT_SHA }} $file; then
               echo "no contains diff" $file
               exclude_files_list="$exclude_files_list $file"
             else
               echo "contains diff" $file
+              include_files_list="$include_files_list $file"
             fi
           done
+
+          diff_files_array=$(echo $include_files_list | jq -R -s 'split(" ") | map(select(length > 0))')
+          jq --argjson diff_files "$diff_files_array" 'del(.files | with_entries(select($diff_files | index(.key) | not)))' ./.artifacts/previous.json > ./.artifacts/previous_updated.json
+
+          echo "$updated_json" > ./.artifacts/previous.json
+          jq ./.artifacts/previous.json
+
           echo "exclude: $exclude_files_list"
           echo "EXCLUDE_FILES_LIST=$exclude_files_list" >> $GITHUB_ENV
       
