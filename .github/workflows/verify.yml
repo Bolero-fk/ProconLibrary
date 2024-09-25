@@ -40,6 +40,8 @@ jobs:
             if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1; then
               if [ -f "./.artifacts/merge.json" ]; then
                 mv ./.artifacts/merge.json ./.artifacts/previous.json
+                commit_sha=$(gh run view $workflow_id --json headSha -q '.headSha')
+                echo "COMMIT_SHA=$commit_sha" >> $GITHUB_ENV
                 exit 0
               fi
             fi
@@ -52,6 +54,18 @@ jobs:
         run: |
           include_files=$(jq -r '.files | keys[]' ./.artifacts/previous.json)
           include_files_list=$(echo $include_files | tr '\n' ' ')
+
+          filtered_files=""
+          for file in $include_files_list; do
+            # commit_shaと現在の状態の差分を確認
+            if git diff --quiet $commit_sha $file; then
+              filtered_files="$filtered_files $file"
+            fi
+          done
+
+          # フィルタリング後のファイルリストを出力
+          echo "Filtered files with no diff: $filtered_files"
+
           echo "Running oj-resolve with include files: $include_files_list"
           echo "INCLUDE_FILES_LIST=$include_files_list" >> $GITHUB_ENV
       
