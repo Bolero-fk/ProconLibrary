@@ -107,7 +107,7 @@ jobs:
         if: env.USE_CACHE == 'true'
         run: |
           python3 ./scripts/filter_test_files_from_json.py "./.artifacts/previous_result.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/result.json
-          python3 ./scripts/filter_test_files_from_json.py "./previous_verify_files.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/previous_verify_files.json
+          python3 ./scripts/filter_test_files_from_json.py "./previous_verify_files.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/verify_files.json
 
       - name: Upload Result-previous
         if: env.USE_CACHE == 'true'
@@ -121,8 +121,8 @@ jobs:
         if: env.USE_CACHE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: verify-files-previous
-          path: ./.artifacts/previous_verify_files.json
+          name: Previous-verify-files-json
+          path: ./.artifacts/verify_files.json
           retention-days: 1
 
       # Initialize your own environment for resolving.
@@ -243,6 +243,7 @@ jobs:
         with:
           download-all: true
           artifact-root: .artifacts/
+          set-env: false
   
       - name: Extract bundled
         shell: bash
@@ -262,21 +263,16 @@ jobs:
         with:
           cache-pip: true
 
-      - name: Bundle verify_files.json
-        shell: bash
-        run: |
-          ls ./.artifacts
-          ARTIFACTS_ROOT="${{ steps.all-artifacts.outputs.artifacts-root }}"
-          PREV_VERIFY_JSON="${ARTIFACTS_ROOT}/verify-files-previous/previous_verify_files.json"
-
-          if [ -f "$PREV_VERIFY_JSON" ]; then
-            python3 ./scripts/merge_json_files.py "${{ env.COMPETITIVE_VERIFY_FILES_PATH }}" "$PREV_VERIFY_JSON" > ./.artifacts/merged_verify_files.json
-            mv ./.artifacts/merged_verify_files.json "${{ env.COMPETITIVE_VERIFY_FILES_PATH }}"
-          fi
+      - name: Merge json
+        uses: competitive-verifier/actions/merge-verify-files@v2
+        with:
+          verify-files: .artifacts/*-verify-files-json/verify_files.json
+          output-path: .artifacts/verify_files.json
 
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
         with:
+          verify-files: .artifacts/verify_files.json
           verify-result: .artifacts/Result-*/result.json
           destination: _jekyll
           write-summary: true
