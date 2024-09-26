@@ -7,6 +7,12 @@ on:
       - '**.cpp'
       - '**.hpp'
   workflow_dispatch:
+    inputs:
+      use_cache:
+        description: 'Use cache?'
+        required: true
+        default: 'true'
+        type: boolean
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -26,19 +32,29 @@ jobs:
       dropbox_token: ${{steps.set_dropbox_token.outputs.dropbox_token}}
     steps:
       - uses: actions/checkout@v4
-          
+
+      - name: Set use_cache environment variable
+        run: |
+          if [ -z "${{ github.event.inputs.use_cache }}" ]; then
+            echo "USE_CACHE=true" >> $GITHUB_ENV
+          else
+            echo "USE_CACHE=${{ github.event.inputs.use_cache }}" >> $GITHUB_ENV
+          fi
+      
       - name: Set up competitive-verifier
         uses: competitive-verifier/actions/setup@v2
         with:
           cache-pip: true
+
       - name: Download previous verify result
+        if: env.USE_CACHE == 'true'
         run: |
-          workflow_ids=$(gh run list --workflow verify --limit 100 --json databaseId -q '.[].databaseId')
+          workflow_ids=$(gh run list --workflow verify --limit 10 --json databaseId -q '.[].databaseId')
           for workflow_id in $workflow_ids; do
             # Try download Result-cache
             if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1;then
-              if [ -f "./.artifacts/merge.json" ]; then
-                mv ./.artifacts/merge.json ./.artifacts/previous_result.json
+              if [ -f "./.artifacts/cache.json" ]; then
+                mv ./.artifacts/cache.json ./.artifacts/previous_result.json
                 commit_sha=$(gh run view $workflow_id --json headSha -q '.headSha')
                 echo "COMMIT_SHA=$commit_sha" >> $GITHUB_ENV
                 exit 0
@@ -50,11 +66,13 @@ jobs:
             fi
           done
           echo "No Result-cache artifact found in the recent verify runs."
+          echo "USE_CACHE=false" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
       # Generate verify_files contains all test files 
       - name: all test oj-resolve
+        if: env.USE_CACHE == 'true'
         uses: competitive-verifier/actions/oj-resolve@v2
         with:
           output-path: previous_verify_files.json
@@ -65,11 +83,13 @@ jobs:
           config: .verify-helper/config.toml
 
       - name: parse-doxygen
+        if: env.USE_CACHE == 'true'
         uses: competitive-verifier/actions/parse-doxygen@v2
         with:
           verify-files: previous_verify_files.json
 
       - name: Extracrt test file
+        if: env.USE_CACHE == 'true'
         run: |
           echo "using commit id: ${{ env.COMMIT_SHA }}"
           git fetch origin ${{ env.COMMIT_SHA }}
@@ -78,18 +98,21 @@ jobs:
           echo "INCLUDE_FILES_LIST=$include_files" >> $GITHUB_ENV
 
       - name: Filter previous.json
+        if: env.USE_CACHE == 'true'
         run: |
           python3 ./scripts/filter_test_files_from_json.py "./.artifacts/previous_result.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/result.json
           python3 ./scripts/filter_test_files_from_json.py "./previous_verify_files.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/previous_verify_files.json
 
       - name: Upload Result-previous
+        if: env.USE_CACHE == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Result-previous
           path: ./.artifacts/result.json
           retention-days: 1
 
-      - name: Upload Result-previous
+      - name: Upload verify-files-previous
+        if: env.USE_CACHE == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: verify-files-previous
@@ -116,7 +139,7 @@ jobs:
         uses: competitive-verifier/actions/upload-verify-artifact@v2
         with:
           file: verify_files.json
-          retention-days: 90
+          retention-days: 1
 
       - name: Check bundled
         id: test-bundled
@@ -240,22 +263,32 @@ jobs:
           JSON_FILES=$(find $ARTIFACTS_ROOT -name "result.json")
           python3 ./scripts/merge_json_files.py $JSON_FILES > ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
 
-      - name: Bundle verify_files.json
-        shell: bash
-        run: |
-          python3 ./scripts/merge_json_files.py ${{ env.COMPETITIVE_VERIFY_FILES_PATH }} ${{ steps.all-artifacts.outputs.artifacts-root }}/verify-files-previous/previous_verify_files.json > ./.artifacts/merged_verify_files.json
-
-      - name: Change verify_files.json
-        shell: bash
-        run: |
-          mv ./.artifacts/merged_verify_files.json ${{ env.COMPETITIVE_VERIFY_FILES_PATH }}
-
       - name: Merge all verification result
         shell: bash
         run: |
-          python3 ./scripts/merge_json_files.py ${{ steps.all-artifacts.outputs.artifacts-root }}/Result-previous/result.json ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json > ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
-          jq '{total_seconds: 0} + .' "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json" > "${{ steps.all-artifacts.outputs.artifacts-root }}/temp_cache.json"
-          mv "${{ steps.all-artifacts.outputs.artifacts-root }}/temp_cache.json" "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json"
+          ARTIFACTS_ROOT="${{ steps.all-artifacts.outputs.artifacts-root }}"
+          PREV_RESULT_JSON="${ARTIFACTS_ROOT}/Result-previous/result.json"
+          CACHE_JSON="${ARTIFACTS_ROOT}/cache.json"
+          MERGE_JSON="${ARTIFACTS_ROOT}/merge.json"
+
+          if [ -f "$PREV_RESULT_JSON" ]; then
+            python3 ./scripts/merge_json_files.py "$PREV_RESULT_JSON" "$MERGE_JSON" > "$CACHE_JSON"            
+            jq '{total_seconds: 0} + .' "$CACHE_JSON" > "${ARTIFACTS_ROOT}/temp_cache.json"
+            mv "${ARTIFACTS_ROOT}/temp_cache.json" "$CACHE_JSON"
+          else
+            jq '{total_seconds: 0} + .' "$MERGE_JSON" > "$CACHE_JSON"
+          fi
+
+      - name: Bundle verify_files.json
+        shell: bash
+        run: |
+          ARTIFACTS_ROOT="${{ steps.all-artifacts.outputs.artifacts-root }}"
+          PREV_VERIFY_JSON="${ARTIFACTS_ROOT}/verify-files-previous/previous_verify_files.json"
+
+          if [ -f "$PREV_VERIFY_JSON" ]; then
+            python3 ./scripts/merge_json_files.py "${{ env.COMPETITIVE_VERIFY_FILES_PATH }}" "$PREV_VERIFY_JSON" > ./.artifacts/merged_verify_files.json
+            mv ./.artifacts/merged_verify_files.json "${{ env.COMPETITIVE_VERIFY_FILES_PATH }}"
+          fi
 
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
@@ -289,6 +322,7 @@ jobs:
           name: Result-cache
           path: ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
           retention-days: 90
+
   deploy:
     if: (success() || failure()) && github.ref == 'refs/heads/main' && needs.docs-and-check.outputs.upload-pages == 'true'
     needs: docs-and-check
