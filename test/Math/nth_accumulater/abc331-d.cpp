@@ -7,6 +7,7 @@ using namespace std;
 
 int main()
 {
+
     long long N, Q;
     cin >> N >> Q;
 
