@@ -53,8 +53,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
-      # ToDo Remove
-      - name: oj-resolve
+      # Generate verify_files contains all test files 
+      - name: all test oj-resolve
         uses: competitive-verifier/actions/oj-resolve@v2
         with:
           output-path: previous_verify_files.json
@@ -63,6 +63,11 @@ jobs:
           exclude: scripts/*
           # If you have config.toml
           config: .verify-helper/config.toml
+
+      - name: parse-doxygen
+        uses: competitive-verifier/actions/parse-doxygen@v2
+        with:
+          verify-files: previous_verify_files.json
 
       - name: Extracrt test file
         run: |
