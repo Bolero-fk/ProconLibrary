@@ -299,7 +299,7 @@ jobs:
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
         with:
-          verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
+          verify-result: .artifacts/Result-*/result.json
           destination: _jekyll
           write-summary: true
 
@@ -320,7 +320,7 @@ jobs:
       - name: Check
         uses: competitive-verifier/actions/check@v2
         with:
-          verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
+          verify-result: .artifacts/Result-*/result.json
 
       - name: Update "newest" flags in cache.json
         run: 'sed -i "s/\"newest\": true/\"newest\": false/g" "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json"'
