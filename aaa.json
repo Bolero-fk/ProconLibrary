@@ -1,0 +1,30 @@
+{
+  "files": {
+    "test/Heuristic/approx_tsp_solver/my_test.cpp": {
+      "dependencies": [
+        "Heuristic/approx_tsp_solver.hpp",
+        "Heuristic/fast_random_engine.hpp",
+        "test/Heuristic/approx_tsp_solver/my_test.cpp"
+      ],
+      "verification": [
+        {
+          "name": "g++",
+          "type": "command",
+          "command": ".competitive-verifier/cache/standalone/eabb22a3c07099884346e82af516ada1/a.out",
+          "compile": "g++ -std=c++20 -O2 -I ac-library -I /home/runner/work/ProconLibrary/ProconLibrary -o .competitive-verifier/cache/standalone/eabb22a3c07099884346e82af516ada1/a.out test/Heuristic/approx_tsp_solver/my_test.cpp",
+          "tempdir": ".competitive-verifier/cache/standalone/eabb22a3c07099884346e82af516ada1"
+        }
+      ],
+      "document_attributes": {
+        "STANDALONE": "",
+        "links": []
+      },
+      "additonal_sources": [
+        {
+          "name": "bundled",
+          "path": ".competitive-verifier/bundled/test/Heuristic/approx_tsp_solver/my_test.cpp"
+        }
+      ]
+    }
+  }
+}

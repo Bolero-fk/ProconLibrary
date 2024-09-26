@@ -88,7 +88,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: verify-files-previous
-          path: ./.artifacts/previous_verify.json
+          path: ./.artifacts/previous_verify_files.json
           retention-days: 1
 
       # Initialize your own environment for resolving.
@@ -235,13 +235,22 @@ jobs:
           JSON_FILES=$(find $ARTIFACTS_ROOT -name "result.json")
           python3 ./scripts/merge_json_files.py $JSON_FILES > ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json
 
+      - name: Bundle verify_files.json
+        shell: bash
+        run: |
+          python3 ./scripts/merge_json_files.py ${{ env.COMPETITIVE_VERIFY_FILES_PATH }} ${{ steps.all-artifacts.outputs.artifacts-root }}/verify-files-previous/previous_verify_files.json > ./.artifacts/merged_verify_files.json
+
+      - name: Change verify_files.json
+        shell: bash
+        run: |
+          mv ./.artifacts/merged_verify_files.json ${{ env.COMPETITIVE_VERIFY_FILES_PATH }}
+
       - name: Merge all verification result
         shell: bash
         run: |
           python3 ./scripts/merge_json_files.py ${{ steps.all-artifacts.outputs.artifacts-root }}/Result-previous/result.json ${{ steps.all-artifacts.outputs.artifacts-root }}/merge.json > ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
           jq '{total_seconds: 0} + .' "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json" > "${{ steps.all-artifacts.outputs.artifacts-root }}/temp_cache.json"
           mv "${{ steps.all-artifacts.outputs.artifacts-root }}/temp_cache.json" "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json"
-          cat "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json"
 
       - name: Docs
         uses: competitive-verifier/actions/docs@v2
