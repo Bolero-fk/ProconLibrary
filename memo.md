@@ -33,3 +33,9 @@ GitHub ActionsのWorkflow内でジョブ間でトークンをやり取りする�
 - https://github.com/Bolero-fk/ProconLibrary/commit/d0b087d3d12deade217e37102648df1b8d872d85
 
 参考 https://github.com/competitive-verifier/competitive-verifier/issues/95  
+
+# Local環境でのverify実行方法について
+```competitive-verifier oj-resolve --config ./.verify-helper/config.toml --include ./test/Math/kth_root_integer/* | competitive-verifier verify --verify-json /dev/stdin```
+
+dropbox apiを使用する場合は事前に以下を実行する
+```export DROPBOX_TOKEN=${YOUR_ACCESS_CODE}```
