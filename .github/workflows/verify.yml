@@ -322,6 +322,9 @@ jobs:
         with:
           verify-result: ${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json
 
+      - name: Update "newest" flags in cache.json
+        run: 'sed -i "s/\"newest\": true/\"newest\": false/g" "${{ steps.all-artifacts.outputs.artifacts-root }}/cache.json"'
+
       - name: Upload cache result
         uses: actions/upload-artifact@v4
         with:
