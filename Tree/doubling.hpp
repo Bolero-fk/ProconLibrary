@@ -11,6 +11,8 @@ class Doubling
     bool done_initialized = false;
 
 public:
+    Doubling() {};
+
     Doubling(int N, unsigned long long max_k) : N(N)
     {
         L = max<int>(bit_width(max_k), 1);
@@ -48,56 +50,47 @@ public:
         done_initialized = true;
     }
 
-    // vを始点にK回移動した先のノードを返します
-    pair<int, T> step_forward(int v, unsigned long long k)
+    vector<pair<int, T>> step_forwards(const vector<int> &indeces, unsigned long long k)
     {
         if (!done_initialized)
         {
             init();
         }
 
-        T sum_cost = 0;
-
-        for (int i = L - 1; i >= 0; --i)
+        vector<pair<int, T>> result(indeces.size());
+        for (int i = 0; i < indeces.size(); i++)
         {
-            unsigned long long len = 1ull << i;
-            if (k >= len)
-            {
-                k -= len, sum_cost += parents[v][i].second, v = parents[v][i].first;
-            }
+            result[i].first = indeces[i];
         }
 
-        return pair(v, sum_cost);
+        T sum_cost = 0;
+        while (k != 0)
+        {
+            int bit_i = countr_zero(k);
+            for (pair<int, T> &p : result)
+            {
+                p.second += parents[p.first][bit_i].second, p.first = parents[p.first][bit_i].first;
+            }
+            k ^= 1ll << bit_i;
+        }
+
+        return result;
+    }
+
+    // vを始点にK回移動した先のノードを返します
+    pair<int, T> step_forward(int v, unsigned long long k)
+    {
+        return step_forwards({v}, k)[0];
     }
 
     vector<pair<int, T>> step_forwards(unsigned long long k)
     {
-        if (!done_initialized)
-        {
-            init();
-        }
-
-        vector<pair<int, T>> result(N);
+        vector<int> indeces;
         for (int i = 0; i < N; i++)
         {
-            result[i].first = i;
+            indeces.push_back(i);
         }
 
-        for (int i = L - 1; i >= 0; --i)
-        {
-            unsigned long long len = 1ull << i;
-            if (k >= len)
-            {
-                for (int j = 0; j < N; j++)
-                {
-                    int v = result[j].first;
-                    result[j].first = parents[v][i].first, result[j].second += parents[v][i].second;
-                }
-
-                k -= len;
-            }
-        }
-
-        return result;
+        return step_forwards(indeces, k);
     }
 };
