@@ -50,6 +50,25 @@ public:
         done_initialized = true;
     }
 
+    // vを始点にK回移動した先のノードを返します
+    pair<int, T> step_forward(int v, unsigned long long k)
+    {
+        if (!done_initialized)
+        {
+            init();
+        }
+
+        T sum_cost = 0;
+        while (k != 0)
+        {
+            int bit_i = countr_zero(k);
+            sum_cost += parents[v][bit_i].second, v = parents[v][bit_i].first;
+            k ^= 1ll << bit_i;
+        }
+
+        return pair(v, sum_cost);
+    }
+
     vector<pair<int, T>> step_forwards(const vector<int> &indeces, unsigned long long k)
     {
         if (!done_initialized)
@@ -75,12 +94,6 @@ public:
         }
 
         return result;
-    }
-
-    // vを始点にK回移動した先のノードを返します
-    pair<int, T> step_forward(int v, unsigned long long k)
-    {
-        return step_forwards({v}, k)[0];
     }
 
     vector<pair<int, T>> step_forwards(unsigned long long k)
