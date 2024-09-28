@@ -62,12 +62,16 @@ public:
 
     T weight(int a)
     {
+        assert(0 <= a && a < _n);
         leader(a);
         return diff_weight[a];
     }
 
     T diff(int a, int b)
     {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        assert(same(a, b));
         return weight(b) - weight(a);
     }
 
