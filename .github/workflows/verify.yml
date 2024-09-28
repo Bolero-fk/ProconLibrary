@@ -6,6 +6,7 @@ on:
     paths:
       - '**.cpp'
       - '**.hpp'
+      - '**/docs/**.md'
   workflow_dispatch:
     inputs:
       use_cache:
