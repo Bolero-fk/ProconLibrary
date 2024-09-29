@@ -280,11 +280,16 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
           source: _jekyll
           destination: _site
+
+      - name: Modify source code to enable Japanese search functionality
+        run: |
+          sudo sed -i 's/var index = lunr(function(){/var index = lunr(function(){\n        this.use(lunr.multiLanguage('\''en'\'', '\''ja'\''));/' _site/assets/js/just-the-docs.js
 
       - name: Upload artifact
         id: upload-pages
