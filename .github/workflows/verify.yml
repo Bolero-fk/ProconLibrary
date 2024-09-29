@@ -280,11 +280,30 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          source: _jekyll
-          destination: _site
+          ruby-version: '3.3' # Not needed with a .ruby-version file
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+          cache-version: 0 # Increment this number if you need to re-download cached gems
+
+      - name: Build with Jekyll
+        run: |
+          cd ./_jekyll
+          bundle install
+          bundle exec jekyll build --destination ../_site
+          cd ./..
+
+#      - name: Build with Jekyll
+#        uses: actions/jekyll-build-pages@v1
+#        with:
+#          source: _jekyll
+#          destination: _site
+
+      - name: Modify source code to enable Japanese search functionality
+        run: |
+          sed -i 's/var index = lunr(function(){/var index = lunr(function(){\n        this.use(lunr.multiLanguage('\''en'\'', '\''ja'\''));/' _site/assets/js/just-the-docs.js
 
       - name: Upload artifact
         id: upload-pages

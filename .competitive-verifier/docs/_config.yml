@@ -1,0 +1,5 @@
+exclude:
+  - memo.md
+  - README.md
+
+theme: just-the-docs
