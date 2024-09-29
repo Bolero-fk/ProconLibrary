@@ -1,1 +1,6 @@
-theme: just-the-docs
+exclude:
+  - memo.md
+  - README.md
+
+# theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs@v0.9.0
