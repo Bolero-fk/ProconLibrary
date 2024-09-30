@@ -13,7 +13,7 @@ vector<pair<long long, long long>> prime_factorize(long long N)
 各ペアは、最初の要素が素因数、2番目の要素がその素因数の指数を示します。
 
 **制約**
-- $1 \leq N$
+- $0 \lt N$
 
 **計算量**
 - $O(\sqrt{N})$
