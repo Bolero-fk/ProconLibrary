@@ -1,5 +1,5 @@
 ---
-title: 素因数分解
+title: 素数判定
 documentation_of: //Math/primality_test.hpp
 ---
 
