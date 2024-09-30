@@ -4,7 +4,7 @@ using namespace std;
 #include "Other/fast_power.hpp"
 
 template <typename T>
-enable_if_t<is_integral_v<T>, T>
+enable_if_t<is_integral_v<T> || is_same_v<T, __int128_t>, T>
 mod_pow(T x, T n, T mod)
 {
     assert(0 <= n);
