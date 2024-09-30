@@ -14,13 +14,18 @@ private:
         sum_size = 1;
         for (auto size : sizes)
         {
+            assert(0 < size);
             sum_size *= size;
         }
+
+        assert(0 < sum_size);
         values.resize(sum_size);
     }
 
     int get_index(const vector<int> &indexes)
     {
+        assert((int)indexes.size() == DIMENSION_SIZE);
+
         int base = 1;
         int index = 0;
         for (int i = 0; i < DIMENSION_SIZE; i++)
@@ -34,6 +39,8 @@ private:
 
     vector<int> get_index(int index)
     {
+        assert(0 <= index && index < sum_size);
+
         vector<int> indexes(DIMENSION_SIZE);
 
         for (int i = 0; i < DIMENSION_SIZE; i++)
@@ -65,6 +72,8 @@ private:
 
     T sum_from_origin(const vector<int> &indexes)
     {
+        assert((int)indexes.size() == DIMENSION_SIZE);
+
         T result = 0;
         vector<T> counts(DIMENSION_SIZE);
         for (int i = 0; i < DIMENSION_SIZE; i++)
@@ -99,6 +108,8 @@ private:
 public:
     nthAccumulater(const vector<T> &v)
     {
+        assert(DIMENSION_SIZE == 1);
+
         sizes = {(int)v.size() + 1};
         init();
         for (int i1 = 0; i1 < (int)v.size(); i1++)
@@ -110,6 +121,8 @@ public:
 
     nthAccumulater(const vector<vector<T>> &v)
     {
+        assert(DIMENSION_SIZE == 2);
+
         sizes = {(int)v.size() + 1, (int)v[0].size() + 1};
         init();
         for (int i1 = 0; i1 < (int)v.size(); i1++)
@@ -125,6 +138,8 @@ public:
 
     nthAccumulater(const vector<vector<vector<T>>> &v)
     {
+        assert(DIMENSION_SIZE == 3);
+
         sizes = {(int)v.size() + 1, (int)v[0].size() + 1, (int)v[0][0].size() + 1};
         init();
         for (int i1 = 0; i1 < (int)v.size(); i1++)
@@ -142,6 +157,8 @@ public:
 
     nthAccumulater(const vector<vector<vector<vector<T>>>> &v)
     {
+        assert(DIMENSION_SIZE == 4);
+
         sizes = {(int)v.size() + 1, (int)v[0].size() + 1, (int)v[0][0].size() + 1, (int)v[0][0][0].size() + 1};
         init();
         for (int i1 = 0; i1 < (int)v.size(); i1++)
@@ -162,30 +179,53 @@ public:
 
     T get(const vector<int> &indexes)
     {
+        assert((int)indexes.size() == DIMENSION_SIZE);
+
         int index = get_index(indexes);
         return get(index);
     }
 
     T get(const int &index)
     {
+        assert(0 <= index && index < sum_size);
+
         return values[index];
     }
 
     void set(const vector<int> &indexes, const T &value)
     {
+        assert((int)indexes.size() == DIMENSION_SIZE);
+
         int index = get_index(indexes);
         set(index, value);
     }
 
     void set(const int &index, const T &value)
     {
+        assert(0 <= index && index < sum_size);
+
         values[index] = value;
     }
 
-    // [l, r)
-    // 入力された配列が左右上下...に∞に連結されていると仮定して計算する
     T sum(vector<long long> l, vector<long long> r)
     {
+        assert((int)l.size() == DIMENSION_SIZE && (int)r.size() == DIMENSION_SIZE);
+        for (int i = 0; i < DIMENSION_SIZE; i++)
+        {
+            assert(0 <= l[i] && r[i] <= sizes[i]);
+        }
+
+        return cyclic_sum(l, r);
+    }
+
+    T cyclic_sum(vector<long long> l, vector<long long> r)
+    {
+        assert((int)l.size() == DIMENSION_SIZE && (int)r.size() == DIMENSION_SIZE);
+        for (int i = 0; i < DIMENSION_SIZE; i++)
+        {
+            assert(l[i] < r[i]);
+        }
+
         // lの値が負数の場合、正数に変換する
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {

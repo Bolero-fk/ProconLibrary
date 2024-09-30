@@ -34,7 +34,7 @@ int main()
         cin >> A >> B >> C >> D;
         C++, D++;
 
-        cout << accumulater.sum({A, B}, {C, D}) << endl;
+        cout << accumulater.cyclic_sum({A, B}, {C, D}) << endl;
     }
 
     return 0;
