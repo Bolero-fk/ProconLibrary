@@ -1,3 +1,6 @@
+#include <bits/stdc++.h>
+using namespace std;
+
 template <class mint>
 mint sum_of_geometric_sequence(mint a, mint r, long long n)
 {
