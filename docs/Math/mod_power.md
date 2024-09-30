@@ -3,7 +3,7 @@ title: 整数累乗 (mod)
 documentation_of: //Math/mod_power.hpp
 ---
 
-# prime_factorize
+# mod_pow
 
 ```cpp
 T  mod_pow(T x, T n, T mod)
