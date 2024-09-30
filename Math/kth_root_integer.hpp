@@ -7,6 +7,9 @@ template <typename T>
 enable_if_t<is_integral_v<T>, T>
 kth_root(T a, T k)
 {
+    assert(0 <= a);
+    assert(0 < k);
+
     if (a == 1)
     {
         return 1;
