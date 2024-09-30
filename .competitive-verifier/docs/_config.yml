@@ -3,7 +3,7 @@ exclude:
   - README.md
 
 search:
-  tokenizer_separator: /[\s\-/\u{3000}-\u{301C}\u{3041}-\u{3093}\u{309B}-\u{309E}]+/gu
+  tokenizer_separator: /[\s\-/\u{3000}-\u{301C}\u{3041}-\u{3093}\u{30A1}-\u{30F6}\u{309B}-\u{309E}\u{4E00}-\u{9FAF}]+/gu
 
 # theme: just-the-docs
 remote_theme: just-the-docs/just-the-docs@v0.9.0
