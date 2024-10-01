@@ -105,75 +105,48 @@ private:
         return result;
     }
 
+    template <typename V>
+    void set_sizes(const V &v, int depth = 0)
+    {
+        if constexpr (is_arithmetic_v<V>)
+        {
+            return;
+        }
+        else
+        {
+            sizes[depth] = v.size() + 1;
+            set_sizes(v[0], depth + 1);
+        }
+    }
+
+    template <typename V>
+    void set_values(const V &v, vector<int> &index, int depth = 0)
+    {
+        if constexpr (is_arithmetic_v<V>)
+        {
+            set(index, v);
+            return;
+        }
+        else
+        {
+            for (int i = 0; i < (int)v.size(); ++i)
+            {
+                index[depth] = i + 1;
+                set_values(v[i], index, depth + 1);
+            }
+        }
+    }
+
 public:
-    nthAccumulater(const vector<T> &v)
+    template <typename V>
+    nthAccumulater(const vector<V> &v)
     {
-        assert(DIMENSION_SIZE == 1);
+        sizes.resize(DIMENSION_SIZE, 0);
+        set_sizes(v);
 
-        sizes = {(int)v.size() + 1};
         init();
-        for (int i1 = 0; i1 < (int)v.size(); i1++)
-        {
-            set({i1 + 1}, v[i1]);
-        }
-        build();
-    }
-
-    nthAccumulater(const vector<vector<T>> &v)
-    {
-        assert(DIMENSION_SIZE == 2);
-
-        sizes = {(int)v.size() + 1, (int)v[0].size() + 1};
-        init();
-        for (int i1 = 0; i1 < (int)v.size(); i1++)
-        {
-            for (int i2 = 0; i2 < (int)v[0].size(); i2++)
-            {
-                set({i1 + 1, i2 + 1}, v[i1][i2]);
-            }
-        }
-
-        build();
-    }
-
-    nthAccumulater(const vector<vector<vector<T>>> &v)
-    {
-        assert(DIMENSION_SIZE == 3);
-
-        sizes = {(int)v.size() + 1, (int)v[0].size() + 1, (int)v[0][0].size() + 1};
-        init();
-        for (int i1 = 0; i1 < (int)v.size(); i1++)
-        {
-            for (int i2 = 0; i2 < (int)v[0].size(); i2++)
-            {
-                for (int i3 = 0; i3 < (int)v[0][0].size(); i3++)
-                {
-                    set({i1 + 1, i2 + 1, i3 + 1}, v[i1][i2][i3]);
-                }
-            }
-        }
-        build();
-    }
-
-    nthAccumulater(const vector<vector<vector<vector<T>>>> &v)
-    {
-        assert(DIMENSION_SIZE == 4);
-
-        sizes = {(int)v.size() + 1, (int)v[0].size() + 1, (int)v[0][0].size() + 1, (int)v[0][0][0].size() + 1};
-        init();
-        for (int i1 = 0; i1 < (int)v.size(); i1++)
-        {
-            for (int i2 = 0; i2 < (int)v[0].size(); i2++)
-            {
-                for (int i3 = 0; i3 < (int)v[0][0].size(); i3++)
-                {
-                    for (int i4 = 0; i4 < (int)v[0][0][0].size(); i4++)
-                    {
-                        set({i1 + 1, i2 + 1, i3 + 1, i4 + 1}, v[i1][i2][i3][i4]);
-                    }
-                }
-            }
-        }
+        vector<int> index(DIMENSION_SIZE);
+        set_values(v, index);
         build();
     }
 
