@@ -1,6 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc366/tasks/abc366_d
 
-#include "Math/nth_accumulater.hpp"
+#include "DataStructure/nth_accumulater.hpp"
 #include <bits/stdc++.h>
 
 using namespace std;

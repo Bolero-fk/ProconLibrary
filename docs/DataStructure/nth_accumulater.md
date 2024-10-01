@@ -1,6 +1,6 @@
 ---
 title: n次元累積和
-documentation_of: //Math/nth_accumulater.hpp
+documentation_of: //DataStructure/nth_accumulater.hpp
 ---
 
 # n次元累積和
