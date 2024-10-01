@@ -1,6 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc367/tasks/abc367_f
 
-#include "Hash/zobrist_hash.hpp"
+#include "Hash/zobrist_count_hash.hpp"
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -20,8 +20,7 @@ int main()
         cin >> B[i];
     }
 
-    ZobristHash hashA(A, ZobristHash::HASH_TYPE::COUNT);
-    ZobristHash hashB(B, ZobristHash::HASH_TYPE::COUNT);
+    ZobristCountHash hashA(A), hashB(B);
 
     for (int i = 0; i < Q; i++)
     {
@@ -29,7 +28,7 @@ int main()
         cin >> l >> r >> L >> R;
         l--, L--;
 
-        if (hashA.get_accumulate_hash(l, r) == hashB.get_accumulate_hash(L, R))
+        if (hashA.get_range_hash(l, r) == hashB.get_range_hash(L, R))
         {
             cout << "Yes" << endl;
         }
