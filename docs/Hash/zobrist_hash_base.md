@@ -30,11 +30,11 @@ virtual unsigned long long get_range_hash(int l, int r)
 この関数は、コンストラクタで入力された配列 `v` のうち、指定された範囲 $[l, r)$ の要素に対して累積ハッシュを計算して返します。
 
 ## 派生クラス
-- [ParityHash](zobrist_parity_hash.md)  
+- [ParityHash](zobrist_parity_hash.hpp)  
 指定範囲 $[l, r)$ に含まれる **数値の出現回数の偶奇** のハッシュを計算します。  
-- [CountHash](zobrist_count_hash.md)  
+- [CountHash](zobrist_count_hash.hpp)  
 指定範囲 $[l, r)$ に含まれる **数値の多重集合** のハッシュを計算します。  
-- [TypeHash](zobrist_type_hash.md)  
-範囲 $[\textcolor{red}{0}, r)$ に含まれる **数値の集合** のハッシュを計算します。  
-- [CubicHash](zobrist_cubic_hash.md)  
+- [TypeHash](zobrist_type_hash.hpp)  
+範囲 $[{\color{red} 0}, r)$ に含まれる **数値の集合** のハッシュを計算します。  
+- [CubicHash](zobrist_cubic_hash.hpp)  
 指定範囲 $[l, r)$ に含まれる **数値の総積を因数ごとに 3 で割った余りに置き換えた値** のハッシュを計算します。

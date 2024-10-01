@@ -32,4 +32,4 @@ unsigned long long get_range_hash(int l, int r)
 - $O(1)$
 
 ## 関連情報
-- [ZobristHashBase](zobrist_hash_base.md): 基底クラス
+- [ZobristHashBase](zobrist_hash_base.hpp): 基底クラス
