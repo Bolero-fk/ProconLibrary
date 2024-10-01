@@ -21,16 +21,12 @@ int main()
         {
             int u, v, x;
             cin >> u >> v >> x;
-            bool is_valid = true;
-            if (wuf.same(u, v) && wuf.diff(u, v) != x)
-            {
-                is_valid = false;
-            }
-            else
+            if (wuf.valid(u, v, x))
             {
                 wuf.merge(u, v, x);
             }
-            cout << is_valid << endl;
+
+            cout << wuf.valid(u, v, x) << endl;
         }
         if (t == 1)
         {

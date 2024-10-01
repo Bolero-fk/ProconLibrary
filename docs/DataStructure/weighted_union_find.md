@@ -64,6 +64,22 @@ bool wuf.same(int a, int b)
 
 - ならし $O(\alpha(n))$
 
+## valid
+
+```cpp
+bool wuf.valid(int a, int b, T w)
+```
+頂点$a$と頂点$b$の重みの差を$w$に設定した場合に、ここまでにmergeされた情報に矛盾が生じないかを返します。  
+
+**制約**
+
+- $0 \leq a < n$
+- $0 \leq b < n$
+
+**計算量**
+
+- ならし $O(\alpha(n))$
+
 ## leader
 
 ```cpp

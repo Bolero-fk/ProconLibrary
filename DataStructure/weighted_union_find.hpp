@@ -12,11 +12,11 @@ public:
     {
         assert(0 <= a && a < _n);
         assert(0 <= b && b < _n);
+        assert(valid(a, b, w));
 
         int x = leader(a), y = leader(b);
-        if (x == y)
+        if (same(a, b))
         {
-            assert(diff(a, b) == w);
             return x;
         }
 
@@ -40,6 +40,13 @@ public:
         assert(0 <= a && a < _n);
         assert(0 <= b && b < _n);
         return leader(a) == leader(b);
+    }
+
+    bool valid(int a, int b, T w)
+    {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        return !same(a, b) || diff(a, b) == w;
     }
 
     int leader(int a)
