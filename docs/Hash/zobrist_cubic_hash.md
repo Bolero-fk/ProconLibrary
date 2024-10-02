@@ -1,11 +1,11 @@
 ---
-title: ZobristHash (立法数判定)
+title: ZobristHash (立方数判定)
 documentation_of: //Hash/zobrist_cubic_hash.hpp
 ---
 
 # ZobristCubicHash
 `ZobristCubicHash` は、Zobrist Hash を用いて指定範囲の数値列に含まれる  **数値の総積を因数ごとに 3 で割った余りに置き換えた値** のハッシュ値を計算するクラスです。  
-累積ハッシュ値が 0 のとき、指定範囲の値の総積は立法数であると判定できます。  
+累積ハッシュ値が 0 のとき、指定範囲の値の総積は立方数であると判定できます。  
 
 ## コンストラクタ
 ```cpp
