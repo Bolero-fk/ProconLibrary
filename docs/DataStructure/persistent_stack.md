@@ -1,14 +1,16 @@
 ---
 title: 永続スタック
 documentation_of: //DataStructure/persistent_stack.hpp
-tags: ["PersistentStack", "永続スタック", "永続Stack"]
 ---
 
 # 永続スタック
 永続スタックは、永続データ構造の一種で、変更の履歴だけを持つことでデータ自体のサイズを小さく保ちながら `stack` の操作を実現できます。このデータ構造は、最新の変更だけをコピーするので過去の状態を効率的に保存することが可能です。
 
-## コンストラクタ
+## 参考
+- [あなたの庭に永続データ構造を飾りませんか？](https://noshi91.hatenablog.com/entry/2019/02/04/175100)
+- [Persistent Stack - AtCoder Heuristic Contest Memo](https://jetbead.github.io/AtCoderHeuristicContestMemo/Library/persistent_stack.html)
 
+## コンストラクタ
 ```cpp
 PersistentStack<T> ps
 ```
@@ -97,7 +99,3 @@ vector<T> ps.extract_values()
 **計算量**
 
 - $O(n)$
-
-## 参考
-- [あなたの庭に永続データ構造を飾りませんか？](https://noshi91.hatenablog.com/entry/2019/02/04/175100)
-- [Persistent Stack - AtCoder Heuristic Contest Memo](https://jetbead.github.io/AtCoderHeuristicContestMemo/Library/persistent_stack.html)
