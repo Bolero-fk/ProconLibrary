@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       dropbox_token: ${{steps.set_dropbox_token.outputs.dropbox_token}}
     steps:
@@ -179,7 +179,7 @@ jobs:
           DROPBOX_REFRESH_TOKEN: ${{secrets.DROPBOX_REFRESH_TOKEN}}
 
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [setup]
     env:
       SPLIT_SIZE: "20"
@@ -229,7 +229,7 @@ jobs:
           retention-days: 1
 
   docs-and-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [verify]
     outputs:
       upload-pages: ${{steps.upload-pages.outcome == 'success'}}
@@ -323,7 +323,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
