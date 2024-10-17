@@ -4,8 +4,9 @@ documentation_of: //Heuristic/raw_pointer_persistent_stack.hpp
 ---
 
 # 永続スタック (生ポインタ)
-[永続スタック](../Heuristic/persistent_stack.md)のポインタに関する内部実装を生ポインタに変更したクラスです。  
+[永続スタック](../DataStructure/persistent_stack.hpp)のポインタに関する内部実装を生ポインタに変更したクラスです。  
 ポインタの開放処理が速くなる半面、**メモリリークやダングリングポインタなどのリスクが生じる**ことを理解したうえで使用すること。  
+ビームサーチの行動履歴管理に使用したことがある。  
 
 ## コンストラクタ
 ```cpp
