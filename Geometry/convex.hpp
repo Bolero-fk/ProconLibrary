@@ -17,7 +17,10 @@ class Convex
 
     T calculate_twice_area()
     {
-        assert(3 <= ccw_points.size());
+        if (ccw_points.size() < 3)
+        {
+            return 0;
+        }
 
         T result = 0;
         for (int i = 0; i < ccw_points.size(); i++)
@@ -85,7 +88,6 @@ class Convex
 
     void set_bounding_box()
     {
-        assert(0 < ccw_points.size());
         const T MAX_INF = numeric_limits<T>::max();
         const T MIN_INF = numeric_limits<T>::lowest();
 
@@ -108,12 +110,12 @@ public:
         // 重複点の削除 + ソート
         set<Point<T>> point_st(points.begin(), points.end());
 
-        if (point_st.size() < 2)
+        if (point_st.size() <= 2)
         {
             ccw_points = vector<Point<T>>(point_st.begin(), point_st.end());
-            twice_area = 0;
             upper_hull = point_st;
             lower_hull = point_st;
+            twice_area = 0;
             set_bounding_box();
             return;
         }

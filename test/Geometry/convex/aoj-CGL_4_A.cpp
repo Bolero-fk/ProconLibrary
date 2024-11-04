@@ -20,16 +20,13 @@ int main()
 
     Convex convex(points, true);
 
-    /*
-    const vector<Point<int>> ccw_points = convex.ccw_points;
-
-    cout << convex.ccw_points.size() << endl;
+    const vector<Point<int>> ccw_points = convex.get_ccw_points();
 
     int start_i = 0;
-    for (int i = 1; i < convex.ccw_points.size(); i++)
+    for (int i = 1; i < ccw_points.size(); i++)
     {
-        Point p1 = convex.ccw_points[start_i];
-        Point p2 = convex.ccw_points[i];
+        Point p1 = ccw_points[start_i];
+        Point p2 = ccw_points[i];
         if (p1.imag() != p2.imag() && p2.imag() < p1.imag())
         {
             start_i = i;
@@ -40,11 +37,12 @@ int main()
         }
     }
 
-    for (int i = 0; i < convex.ccw_points.size(); i++)
+    cout << ccw_points.size() << endl;
+    for (int i = 0; i < ccw_points.size(); i++)
     {
-        Point p = convex.ccw_points[(start_i + i) % convex.ccw_points.size()];
+        Point p = ccw_points[(start_i + i) % ccw_points.size()];
         cout << p.real() << " " << p.imag() << endl;
-    }*/
+    }
 
     return 0;
 }
