@@ -16,3 +16,35 @@ vector<long long> enumerate_divisor(long long n)
     sort(dst.begin(), dst.end());
     return dst;
 }
+
+vector<long long> enumerate_divisor(const vector<pair<long long, long long>> &prime_factors)
+{
+    assert(all_of(prime_factors.begin(), prime_factors.end(), [](const auto &n)
+                  { return 0 < n.first && 0 < n.second; }));
+
+    vector<long long> dst;
+    auto dfs = [&](int now, long long n, auto dfs) -> void
+    {
+        if (now == prime_factors.size())
+        {
+            dst.push_back(n);
+            return;
+        }
+
+        auto [p, c] = prime_factors[now];
+        for (int i = 0; i < c + 1; i++)
+        {
+            dfs(now + 1, n, dfs);
+            if (i != c)
+            {
+                n *= p;
+            }
+        }
+    };
+
+    dfs(0, 1, dfs);
+
+    sort(dst.begin(), dst.end());
+
+    return dst;
+}
