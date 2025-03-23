@@ -24,7 +24,7 @@ private:
 
     int get_index(const vector<int> &indexes)
     {
-        assert((int)indexes.size() == DIMENSION_SIZE);
+        assert(ssize(indexes) == DIMENSION_SIZE);
 
         int base = 1;
         int index = 0;
@@ -72,7 +72,7 @@ private:
 
     T sum_from_origin(const vector<long long> &indexes)
     {
-        assert((int)indexes.size() == DIMENSION_SIZE);
+        assert(ssize(indexes) == DIMENSION_SIZE);
 
         T result = 0;
         vector<T> counts(DIMENSION_SIZE);
@@ -152,7 +152,7 @@ public:
 
     T get(const vector<int> &indexes)
     {
-        assert((int)indexes.size() == DIMENSION_SIZE);
+        assert(ssize(indexes) == DIMENSION_SIZE);
 
         int index = get_index(indexes);
         return get(index);
@@ -167,7 +167,7 @@ public:
 
     void set(const vector<int> &indexes, const T &value)
     {
-        assert((int)indexes.size() == DIMENSION_SIZE);
+        assert(ssize(indexes) == DIMENSION_SIZE);
 
         int index = get_index(indexes);
         set(index, value);
@@ -182,7 +182,7 @@ public:
 
     T sum(vector<long long> l, vector<long long> r)
     {
-        assert((int)l.size() == DIMENSION_SIZE && (int)r.size() == DIMENSION_SIZE);
+        assert(ssize(l) == DIMENSION_SIZE && ssize(r) == DIMENSION_SIZE);
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
             assert(0 <= l[i] && r[i] <= sizes[i]);
@@ -193,7 +193,7 @@ public:
 
     T cyclic_sum(vector<long long> l, vector<long long> r)
     {
-        assert((int)l.size() == DIMENSION_SIZE && (int)r.size() == DIMENSION_SIZE);
+        assert(ssize(l) == DIMENSION_SIZE && ssize(r) == DIMENSION_SIZE);
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
             assert(l[i] < r[i]);
