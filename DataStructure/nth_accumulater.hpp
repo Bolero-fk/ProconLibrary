@@ -70,7 +70,7 @@ private:
         }
     }
 
-    T sum_from_origin(const vector<int> &indexes)
+    T sum_from_origin(const vector<long long> &indexes)
     {
         assert((int)indexes.size() == DIMENSION_SIZE);
 
@@ -214,7 +214,7 @@ public:
         T result = 0;
         for (unsigned int bit = 0; bit < (1 << DIMENSION_SIZE); bit++)
         {
-            vector<int> indexes(DIMENSION_SIZE);
+            vector<long long> indexes(DIMENSION_SIZE);
             for (int i = 0; i < DIMENSION_SIZE; i++)
             {
                 indexes[i] = ((bit >> i) & 1) ? r[i] : l[i];
