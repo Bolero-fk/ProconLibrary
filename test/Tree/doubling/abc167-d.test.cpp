@@ -1,4 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc167/tasks/abc167_d
+// competitive-verifier: IGNORE
+// AtCoder's test cases are now private.
 
 #include "Tree/doubling.hpp"
 #include <bits/stdc++.h>

@@ -1,4 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc169/tasks/abc169_b
+// competitive-verifier: IGNORE
+// AtCoder's test cases are now private.
 
 #include "Math/is_multiplication_overflow.hpp"
 #include <bits/stdc++.h>

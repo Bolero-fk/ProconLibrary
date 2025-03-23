@@ -1,4 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc296/tasks/abc296_g
+// competitive-verifier: IGNORE
+// AtCoder's test cases are now private.
 
 #include "Geometry/convex_algo/contains_point.hpp"
 #include <bits/stdc++.h>

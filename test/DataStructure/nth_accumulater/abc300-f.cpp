@@ -1,4 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc300/tasks/abc300_f
+// competitive-verifier: IGNORE
+// AtCoder's test cases are now private.
 
 #include "Other/binary_search.hpp"
 #include "DataStructure/nth_accumulater.hpp"

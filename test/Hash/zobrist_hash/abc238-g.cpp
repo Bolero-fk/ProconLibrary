@@ -1,4 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc238/tasks/abc238_g
+// competitive-verifier: IGNORE
+// AtCoder's test cases are now private.
 
 #include "Hash/zobrist_cubic_hash.hpp"
 #include <bits/stdc++.h>

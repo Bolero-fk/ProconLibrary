@@ -1,4 +1,6 @@
 // competitive-verifier: PROBLEM https://atcoder.jp/contests/abc354/tasks/abc354_d
+// competitive-verifier: IGNORE
+// AtCoder's test cases are now private.
 
 #include "DataStructure/nth_accumulater.hpp"
 #include <bits/stdc++.h>
