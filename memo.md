@@ -39,3 +39,6 @@ GitHub ActionsのWorkflow内でジョブ間でトークンをやり取りする�
 
 dropbox apiを使用する場合は上記の手順でACCESS_CODEを取得して以下を実行する  
 ```export DROPBOX_TOKEN=$(curl -s https://api.dropbox.com/oauth2/token --user c38wlsosanujy5z:qgsndi0xoerw4j1 --data grant_type=authorization_code --data code=${YOUR_ACCESS_CODE} | jq -r '.access_token')```
+
+yukicoder apiを使用する場合はyukicoderのAPIキーを取得して以下を実行する
+```export YUKICODER_TOKEN=xxx```
