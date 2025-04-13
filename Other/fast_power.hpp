@@ -4,6 +4,8 @@ using namespace std;
 template <class S>
 S fast_pow(S x, long long n, function<S(S, S)> mul, function<S()> e)
 {
+    assert(0 <= n);
+
     S ans = e();
 
     while (n)
