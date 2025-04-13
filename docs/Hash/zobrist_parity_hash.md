@@ -1,6 +1,8 @@
 ---
-title: ZobristHash (偶奇判定)
+title: Zobrist Hash (偶奇判定)
 documentation_of: //Hash/zobrist_parity_hash.hpp
+parent: Zobrist Hash
+nav_order: 1
 ---
 
 # ZobristParityHash

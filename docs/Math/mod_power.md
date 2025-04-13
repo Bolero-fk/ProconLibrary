@@ -1,6 +1,7 @@
 ---
 title: 整数累乗 (mod)
 documentation_of: //Math/mod_power.hpp
+parent: Math
 ---
 
 # mod_pow

@@ -1,6 +1,7 @@
 ---
 title: 等比数列の総和 (mod)
 documentation_of: //Math/mod_sum_of_geometric_sequence.hpp
+parent: Math
 ---
 
 # sum_of_geometric_sequence

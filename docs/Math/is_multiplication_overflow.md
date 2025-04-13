@@ -1,6 +1,7 @@
 ---
 title: 積算のオーバーフロー判定
 documentation_of: //Math/is_multiplication_overflow.hpp
+parent: Math
 ---
 
 # is_multiplication_overflow

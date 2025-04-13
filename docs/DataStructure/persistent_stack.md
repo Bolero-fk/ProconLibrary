@@ -1,6 +1,8 @@
 ---
 title: 永続スタック
 documentation_of: //DataStructure/persistent_stack.hpp
+parent: Data Structure
+nav_order: 2
 ---
 
 # 永続スタック

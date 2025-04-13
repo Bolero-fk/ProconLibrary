@@ -1,7 +1,9 @@
 ---
 title: 繰り返し二乗法
 documentation_of: //Other/fast_power.hpp
+parent: Other
 ---
+
 
 # 繰り返し二乗法
 

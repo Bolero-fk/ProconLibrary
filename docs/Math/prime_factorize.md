@@ -1,6 +1,7 @@
 ---
 title: 素因数分解
 documentation_of: //Math/prime_factorize.hpp
+parent: Math
 ---
 
 # prime_factorize

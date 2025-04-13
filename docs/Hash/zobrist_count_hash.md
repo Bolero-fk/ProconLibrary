@@ -1,6 +1,8 @@
 ---
-title: ZobristHash (多重集合)
+title: Zobrist Hash (多重集合)
 documentation_of: //Hash/zobrist_count_hash.hpp
+parent: Zobrist Hash
+nav_order: 2
 ---
 
 # ZobristCountHash

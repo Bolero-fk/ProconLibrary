@@ -1,6 +1,7 @@
 ---
 title: 素数判定
 documentation_of: //Math/primality_test.hpp
+parent: Math
 ---
 
 # PrimalityTest

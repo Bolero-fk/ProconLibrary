@@ -1,6 +1,8 @@
 ---
-title: ZobristHash (立方数判定)
+title: Zobrist Hash (立方数判定)
 documentation_of: //Hash/zobrist_cubic_hash.hpp
+parent: Zobrist Hash
+nav_order: 4
 ---
 
 # ZobristCubicHash

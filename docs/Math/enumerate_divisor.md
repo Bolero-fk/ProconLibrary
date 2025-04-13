@@ -1,6 +1,7 @@
 ---
 title: 約数列挙
 documentation_of: //Math/enumerate_divisor.hpp
+parent: Math
 ---
 
 # enumerate_divisor

@@ -1,6 +1,7 @@
 ---
 title: 高速素因数分解
 documentation_of: //Math/fast_factorizer.hpp
+parent: Math
 ---
 
 # FastFactorizer

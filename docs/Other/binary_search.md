@@ -1,6 +1,7 @@
 ---
 title: 二分探索
 documentation_of: //Other/binary_search.hpp
+parent: Other
 ---
 
 # 二分探索

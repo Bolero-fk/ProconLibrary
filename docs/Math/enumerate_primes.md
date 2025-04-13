@@ -1,6 +1,7 @@
 ---
 title: 素数列挙
 documentation_of: //Math/enumerate_primes.hpp
+parent: Math
 ---
 
 # enumerate_primes

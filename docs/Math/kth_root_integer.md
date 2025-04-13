@@ -1,6 +1,7 @@
 ---
 title: k乗根（整数）
 documentation_of: //Math/kth_root_integer.hpp
+parent: Math
 ---
 
 # kth_root

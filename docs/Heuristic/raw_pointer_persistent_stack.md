@@ -1,6 +1,7 @@
 ---
 title: 永続スタック (生ポインタ)
 documentation_of: //Heuristic/raw_pointer_persistent_stack.hpp
+parent: Heuristic
 ---
 
 # 永続スタック (生ポインタ)

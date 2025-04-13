@@ -1,6 +1,9 @@
 ---
 title: Zobrist Hash
 documentation_of: //Hash/zobrist_hash_base.hpp
+parent: Hash
+nav_order: 1
+has_toc: false
 ---
 
 # Zobrist Hash

@@ -1,6 +1,8 @@
 ---
-title: ZobristHash (集合)
+title: Zobrist Hash (集合)
 documentation_of: //Hash/zobrist_type_hash.hpp
+parent: Zobrist Hash
+nav_order: 3
 ---
 
 # ZobristTypeHash
