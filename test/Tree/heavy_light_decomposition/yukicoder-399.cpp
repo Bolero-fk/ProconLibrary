@@ -47,7 +47,7 @@ int main()
 
         auto ranges = hld.get_path_ranges(A, B);
         S sum = e();
-        for (auto [l, r] : ranges)
+        for (auto [l, r, _] : ranges)
         {
             sum = op(sum, seg.prod(l, r));
             seg.apply(l, r, 1);

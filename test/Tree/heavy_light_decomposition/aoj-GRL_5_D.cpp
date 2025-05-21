@@ -55,7 +55,7 @@ int main()
 
             auto ranges = hld.get_path_ranges(0, u);
             S ans = e();
-            for (auto [l, r] : ranges)
+            for (auto [l, r, _] : ranges)
             {
                 ans = op(ans, seg.prod(l, r));
             }

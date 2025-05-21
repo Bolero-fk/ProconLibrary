@@ -34,35 +34,42 @@ public:
         built = true;
     }
 
-    vector<array<int, 2>> get_path_ranges(int u, int v)
+    vector<tuple<int, int, bool>> get_path_ranges(int from, int to)
     {
-        assert(0 <= u && u < n);
-        assert(0 <= v && v < n);
+        assert(0 <= from && from < n);
+        assert(0 <= to && to < n);
         ensure_built();
 
-        vector<array<int, 2>> ranges;
+        list<tuple<int, int, bool>> from_ranges, to_ranges;
 
-        while (head[u] != head[v])
+        while (head[from] != head[to])
         {
-            if (depth[head[v]] < depth[head[u]])
+            if (depth[head[to]] < depth[head[from]])
             {
-                ranges.push_back({pos[head[u]], pos[u] + 1});
-                u = parent[head[u]];
+                from_ranges.push_back({pos[head[from]], pos[from] + 1, true});
+                from = parent[head[from]];
             }
             else
             {
-                ranges.push_back({pos[head[v]], pos[v] + 1});
-                v = parent[head[v]];
+                to_ranges.push_front({pos[head[to]], pos[to] + 1, false});
+                to = parent[head[to]];
             }
         }
 
-        if (depth[v] < depth[u])
+        if (depth[to] < depth[from])
         {
-            swap(u, v);
+            to_ranges.push_front({pos[to], pos[from] + 1, true});
+        }
+        else
+        {
+            from_ranges.push_back({pos[from], pos[to] + 1, false});
         }
 
-        ranges.push_back({pos[u], pos[v] + 1});
-        return ranges;
+        vector<tuple<int, int, bool>> result;
+        result.insert(result.end(), from_ranges.begin(), from_ranges.end());
+        result.insert(result.end(), to_ranges.begin(), to_ranges.end());
+
+        return result;
     }
 
     array<int, 2> get_subtree_range(int u)
