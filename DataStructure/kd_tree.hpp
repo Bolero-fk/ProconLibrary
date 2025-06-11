@@ -71,6 +71,35 @@ public:
                             { return true; });
     }
 
+    /// target から近いものを最大 k 個返す（check で絞り込み可）
+    vector<PointWithID> nearest_k(const array<T, K> &target, size_t k, function<bool(int)> check) const
+    {
+        if (k == 0 || root == nullptr)
+        {
+            return {};
+        }
+
+        MaxHeap pq;
+        nearest_k_search(root, target, 0, k, check, pq);
+
+        vector<PointWithID> res;
+        res.reserve(pq.size());
+        while (!pq.empty())
+        {
+            res.push_back(pq.top().second->data);
+            pq.pop();
+        }
+
+        reverse(res.begin(), res.end());
+        return res;
+    }
+
+    vector<PointWithID> nearest_k(const array<T, K> &target, size_t k) const
+    {
+        return nearest_k(target, k, [](int)
+                         { return true; });
+    }
+
 private:
     using iterator = typename vector<PointWithID>::iterator;
     Node *root = nullptr;
@@ -136,6 +165,53 @@ private:
             range_search(node->left, depth + 1, lower, upper, check, results);
         if (upper[axis] >= node->data.point[axis])
             range_search(node->right, depth + 1, lower, upper, check, results);
+    }
+
+    using QElem = std::pair<T, const Node *>;
+    struct WorseFirst
+    {
+        bool operator()(const QElem &lhs, const QElem &rhs) const
+        {
+            return lhs.first < rhs.first;
+        }
+    };
+
+    using MaxHeap = priority_queue<QElem, vector<QElem>, WorseFirst>;
+
+    void nearest_k_search(
+        const Node *node, const array<T, K> &target,
+        size_t depth, size_t k,
+        const function<bool(int)> &check, MaxHeap &pq) const
+    {
+        if (node == nullptr)
+            return;
+
+        size_t axis = depth % K;
+        T dist2 = distance_squared(node->data.point, target);
+
+        if (check(static_cast<int>(node->data.id)))
+        {
+            if (pq.size() < k)
+            {
+                pq.emplace(dist2, node);
+            }
+            else if (dist2 < pq.top().first)
+            {
+                pq.pop();
+                pq.emplace(dist2, node);
+            }
+        }
+
+        T diff = target[axis] - node->data.point[axis];
+        const Node *nearChild = (diff < 0) ? node->left : node->right;
+        const Node *farChild = (diff < 0) ? node->right : node->left;
+
+        nearest_k_search(nearChild, target, depth + 1, k, check, pq);
+
+        if (pq.size() < k || diff * diff < pq.top().first)
+        {
+            nearest_k_search(farChild, target, depth + 1, k, check, pq);
+        }
     }
 
     // 2点間の二乗距離を計算
