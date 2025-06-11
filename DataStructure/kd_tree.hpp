@@ -39,11 +39,11 @@ public:
         free_tree(root);
     }
 
-    optional<PointWithID> nearest(const array<T, K> &target, T &bestDist,
+    optional<PointWithID> nearest(const array<T, K> &target,
                                   function<bool(int)> check) const
     {
         Node *best = nullptr;
-        bestDist = numeric_limits<T>::max();
+        T bestDist = numeric_limits<T>::max();
         nearest_search(root, target, 0, best, bestDist, check);
         if (best)
             return best->data;
@@ -51,9 +51,9 @@ public:
             return nullopt;
     }
 
-    optional<PointWithID> nearest(const array<T, K> &target, T &bestDist) const
+    optional<PointWithID> nearest(const array<T, K> &target) const
     {
-        return nearest(target, bestDist, [](int)
+        return nearest(target, [](int)
                        { return true; });
     }
 

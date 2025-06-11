@@ -46,12 +46,13 @@ int main()
 
         // 駅を使って移動する
         long double sub_dis1;
-        kd_tree.nearest({P, Q}, sub_dis1);
+        auto point1 = kd_tree.nearest({P, Q}).value();
+        long double sub_dist1 = hypotl(P - point1.point[0], Q - point1.point[1]);
 
-        long double sub_dis2;
-        kd_tree.nearest(target, sub_dis2);
+        auto point2 = kd_tree.nearest(target).value();
+        long double sub_dist2 = hypotl(target[0] - point2.point[0], target[1] - point2.point[1]);
 
-        long double dist2 = sqrtl(sub_dis1) + sqrtl(sub_dis2);
+        long double dist2 = sub_dist1 + sub_dist2;
 
         ans += min(dist1, dist2) * 2;
     }
