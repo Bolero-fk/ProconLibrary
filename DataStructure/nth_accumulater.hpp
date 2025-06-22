@@ -6,47 +6,45 @@ class nthAccumulater
 {
 private:
     vector<T> values;
-    vector<int> sizes;
-    int sum_size;
+    array<int, DIMENSION_SIZE> sizes;
+    array<int, DIMENSION_SIZE + 1> sum_sizes;
 
     void init()
     {
-        sum_size = 1;
-        for (auto size : sizes)
+        int sum_size = 1;
+        for (int i = 0; i < DIMENSION_SIZE; i++)
         {
-            assert(0 < size);
-            sum_size *= size;
+            assert(0 < sizes[i]);
+            sum_sizes[i] = sum_size;
+            sum_size *= sizes[i] + 1; // 0が含まれるので+1する
         }
+        sum_sizes[DIMENSION_SIZE] = sum_size;
 
         assert(0 < sum_size);
         values.resize(sum_size);
     }
 
-    int get_index(const vector<int> &indexes)
+    int get_index(const array<int, DIMENSION_SIZE> &indexes)
     {
-        assert(ssize(indexes) == DIMENSION_SIZE);
-
-        int base = 1;
-        int index = 0;
+        int result = 0;
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
-            index += indexes[i] * base;
-            base *= sizes[i];
+            result += indexes[i] * sum_sizes[i];
         }
 
-        return index;
+        return result;
     }
 
-    vector<int> get_index(int index)
+    array<int, DIMENSION_SIZE> get_index(int index)
     {
-        assert(0 <= index && index < sum_size);
+        assert(0 <= index && index < sum_sizes[DIMENSION_SIZE]);
 
-        vector<int> indexes(DIMENSION_SIZE);
+        array<int, DIMENSION_SIZE> indexes;
 
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
-            indexes[i] = index % sizes[i];
-            index /= sizes[i];
+            indexes[i] = index % (sizes[i] + 1);
+            index /= (sizes[i] + 1);
         }
 
         return indexes;
@@ -56,51 +54,47 @@ private:
     {
         for (int dimension = 0; dimension < DIMENSION_SIZE; dimension++)
         {
-            for (int i = 0; i < sum_size; i++)
+            for (int i = 0; i < sum_sizes[DIMENSION_SIZE]; i++)
             {
-                vector<int> index = get_index(i);
-                if (index[dimension] == sizes[dimension] - 1)
+                array<int, DIMENSION_SIZE> index = get_index(i);
+                if (index[dimension] == sizes[dimension])
                 {
                     continue;
                 }
-                vector<int> next_index = index;
+                array<int, DIMENSION_SIZE> next_index = index;
                 next_index[dimension]++;
                 set(next_index, get(index) + get(next_index));
             }
         }
     }
 
-    T sum_from_origin(const vector<long long> &indexes)
+    T sum_from_origin(const unsigned int &bit_mask, const array<long long, DIMENSION_SIZE> &indexes)
     {
-        assert(ssize(indexes) == DIMENSION_SIZE);
-
         T result = 0;
-        vector<T> counts(DIMENSION_SIZE);
-        for (int i = 0; i < DIMENSION_SIZE; i++)
-        {
-            counts[i] = indexes[i] / (sizes[i] - 1);
-        }
 
-        for (unsigned int bit = 0; bit < (1 << DIMENSION_SIZE); bit++)
+        unsigned int sub_bit = bit_mask;
+        do
         {
             T count = 1;
-            vector<int> query_index(DIMENSION_SIZE);
+            array<int, DIMENSION_SIZE> query_index;
             for (int i = 0; i < DIMENSION_SIZE; i++)
             {
-                if ((bit >> i) & 1)
+                if ((sub_bit >> i) & 1)
                 {
-                    count *= 1;
-                    query_index[i] = indexes[i] % (sizes[i] - 1);
+                    count *= indexes[i] / sizes[i];
+                    query_index[i] = sizes[i];
                 }
                 else
                 {
-                    count *= counts[i];
-                    query_index[i] = sizes[i] - 1;
+                    count *= 1;
+                    query_index[i] = indexes[i] % sizes[i];
                 }
             }
 
             result += count * get(query_index);
-        }
+
+            sub_bit = (sub_bit - 1) & bit_mask;
+        } while (sub_bit != bit_mask);
 
         return result;
     }
@@ -114,13 +108,13 @@ private:
         }
         else
         {
-            sizes[depth] = v.size() + 1;
+            sizes[depth] = v.size();
             set_sizes(v[0], depth + 1);
         }
     }
 
     template <typename V>
-    void set_values(const V &v, vector<int> &index, int depth = 0)
+    void set_values(const V &v, array<int, DIMENSION_SIZE> &index, int depth = 0)
     {
         if constexpr (is_arithmetic_v<V>)
         {
@@ -141,59 +135,66 @@ public:
     template <typename V>
     nthAccumulater(const vector<V> &v)
     {
-        sizes.resize(DIMENSION_SIZE, 0);
         set_sizes(v);
 
         init();
-        vector<int> index(DIMENSION_SIZE);
+        array<int, DIMENSION_SIZE> index;
         set_values(v, index);
         build();
     }
 
-    T get(const vector<int> &indexes)
+    T get(const array<int, DIMENSION_SIZE> &indexes)
     {
-        assert(ssize(indexes) == DIMENSION_SIZE);
-
         int index = get_index(indexes);
         return get(index);
     }
 
     T get(const int &index)
     {
-        assert(0 <= index && index < sum_size);
+        assert(0 <= index && index < sum_sizes[DIMENSION_SIZE]);
 
         return values[index];
     }
 
-    void set(const vector<int> &indexes, const T &value)
+    void set(const array<int, DIMENSION_SIZE> &indexes, const T &value)
     {
-        assert(ssize(indexes) == DIMENSION_SIZE);
-
         int index = get_index(indexes);
         set(index, value);
     }
 
     void set(const int &index, const T &value)
     {
-        assert(0 <= index && index < sum_size);
+        assert(0 <= index && index < sum_sizes[DIMENSION_SIZE]);
 
         values[index] = value;
     }
 
-    T sum(vector<long long> l, vector<long long> r)
+    T sum(const array<long long, DIMENSION_SIZE> &l, const array<long long, DIMENSION_SIZE> &r)
     {
-        assert(ssize(l) == DIMENSION_SIZE && ssize(r) == DIMENSION_SIZE);
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
-            assert(0 <= l[i] && r[i] <= sizes[i]);
+            assert(0 <= l[i] && l[i] < r[i] && r[i] <= sizes[i]);
         }
 
-        return cyclic_sum(l, r);
+        T result = 0;
+        for (unsigned int bit = 0; bit < (1 << DIMENSION_SIZE); bit++)
+        {
+            int index = 0;
+            for (int i = 0; i < DIMENSION_SIZE; i++)
+            {
+                index += (((bit >> i) & 1) ? r[i] : l[i]) * sum_sizes[i];
+            }
+
+            int one_count = popcount(bit);
+            T sign = (one_count % 2) == (DIMENSION_SIZE % 2) ? 1 : -1;
+            result += sign * get(index);
+        }
+
+        return result;
     }
 
-    T cyclic_sum(vector<long long> l, vector<long long> r)
+    T cyclic_sum(array<long long, DIMENSION_SIZE> l, array<long long, DIMENSION_SIZE> r)
     {
-        assert(ssize(l) == DIMENSION_SIZE && ssize(r) == DIMENSION_SIZE);
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
             assert(l[i] < r[i]);
@@ -204,7 +205,7 @@ public:
         {
             if (l[i] < 0)
             {
-                long long mod = sizes[i] - 1;
+                long long mod = sizes[i];
                 long long next_l = (l[i] % mod + mod) % mod;
                 r[i] += next_l - l[i];
                 l[i] = next_l;
@@ -214,15 +215,23 @@ public:
         T result = 0;
         for (unsigned int bit = 0; bit < (1 << DIMENSION_SIZE); bit++)
         {
-            vector<long long> indexes(DIMENSION_SIZE);
+            array<long long, DIMENSION_SIZE> indexes;
+
+            unsigned int bit_mask = 0;
+
             for (int i = 0; i < DIMENSION_SIZE; i++)
             {
                 indexes[i] = ((bit >> i) & 1) ? r[i] : l[i];
+
+                if (sizes[i] <= indexes[i])
+                {
+                    bit_mask |= (1 << i);
+                }
             }
 
             int one_count = popcount(bit);
             T sign = (one_count % 2) == (DIMENSION_SIZE % 2) ? 1 : -1;
-            result += sign * sum_from_origin(indexes);
+            result += sign * sum_from_origin(bit_mask, indexes);
         }
 
         return result;
