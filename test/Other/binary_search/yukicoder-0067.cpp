@@ -10,7 +10,7 @@ int main()
 {
     int N;
     cin >> N;
-    vector<long double> L(N);
+    vector<double> L(N);
     for (int i = 0; i < N; i++)
     {
         cin >> L[i];
@@ -19,18 +19,23 @@ int main()
     long long K;
     cin >> K;
 
-    auto check = [&](long double l) -> bool
+    auto check = [&](double l) -> bool
     {
         long long cnt = 0;
         for (int i = 0; i < N; i++)
         {
+            if (K <= floor(L[i] / l))
+            {
+                return true;
+            }
+
             cnt += floor(L[i] / l);
         }
 
         return K <= cnt;
     };
 
-    long double ans = bin_search<long double>(0, 1e9, check);
+    double ans = bin_search<double>(0, 1e9, check);
     cout << fixed << setprecision(15) << ans << endl;
 
     return 0;
