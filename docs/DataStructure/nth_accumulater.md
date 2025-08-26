@@ -2,7 +2,7 @@
 title: n次元累積和
 documentation_of: //DataStructure/nth_accumulater.hpp
 parent: Data Structure
-nav_order: 1
+nav_order: 2
 ---
 
 # n次元累積和
