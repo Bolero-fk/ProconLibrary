@@ -1,0 +1,1 @@
+competitive-verifier oj-resolve --config ./.verify-helper/config.toml --include "$@" | competitive-verifier verify --verify-json /dev/stdin

@@ -35,7 +35,14 @@ GitHub ActionsのWorkflow内でジョブ間でトークンをやり取りする�
 参考 https://github.com/competitive-verifier/competitive-verifier/issues/95  
 
 # Local環境でのverify実行方法について
-```competitive-verifier oj-resolve --config ./.verify-helper/config.toml --include ./test/Math/kth_root_integer/* | competitive-verifier verify --verify-json /dev/stdin```
+```competitive-verifier oj-resolve --config ./.verify-helper/config.toml --include ./test/Math/kth_root_integer/* | competitive-verifier verify --verify-json /dev/stdin```  
+もしくは  
+```./verify.sh　./test/Math/kth_root_integer/*```  
+を実行する。  
+実行できない場合は  
+```chmod +x ./verify.sh```  
+を実行して実行権限を付与する。    
+
 
 dropbox apiを使用する場合は上記の手順でACCESS_CODEを取得して以下を実行する  
 ```export DROPBOX_TOKEN=$(curl -s https://api.dropbox.com/oauth2/token --user c38wlsosanujy5z:qgsndi0xoerw4j1 --data grant_type=authorization_code --data code=${YOUR_ACCESS_CODE} | jq -r '.access_token')```
