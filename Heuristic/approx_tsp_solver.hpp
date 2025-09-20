@@ -237,7 +237,7 @@ namespace approx_tsp
 
     public:
         template <typename PointType, size_t D>
-        pair<CostType, vector<int>> solve(const vector<array<PointType, D>> &points)
+        pair<CostType, vector<int>> solve(const vector<array<PointType, D>> &points, int start = -1, int end = -1)
         {
             const int N = points.size();
             const int M = (Mode == PathMode::Closed ? N : N + 1);
@@ -254,6 +254,27 @@ namespace approx_tsp
                     }
 
                     costs[i][j] = dist(points[i], points[j]);
+                }
+            }
+
+            if (start != -1 || end != -1)
+            {
+                if (start != -1 && end != -1)
+                {
+                    for (int i = 0; i < N; i++)
+                    {
+                        if (i == start || i == end)
+                        {
+                            continue;
+                        }
+
+                        costs[i][N] = 1e8;
+                        costs[N][i] = 1e8;
+                    }
+                }
+                else
+                {
+                    assert(false);
                 }
             }
 
@@ -313,7 +334,7 @@ namespace approx_tsp
             }
 
             CostType result_cost = 0;
-            for (int i = 0; i < result_path.size() - 1; i++)
+            for (int i = 0; i < (int)result_path.size() - 1; i++)
             {
                 result_cost += costs[result_path[i]][result_path[i + 1]];
             }
