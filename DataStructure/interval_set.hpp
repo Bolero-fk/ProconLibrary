@@ -1,6 +1,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// contains
+// find_intervalのpublic化
+// 次の区間までの
+
 template <typename T, typename Compare = std::less<T>>
     requires std::strict_weak_order<Compare, T, T>
 class IntervalSet
