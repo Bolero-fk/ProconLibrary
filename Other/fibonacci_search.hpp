@@ -6,12 +6,12 @@ template <bool Minimize, typename T>
 pair<long long, T> fibonacci_search(long long x_low, long long x_high, function<T(long long)> f)
 {
     assert(x_low <= x_high);
-    long long offset = x_low - 1;
+    long long offset = x_low;
 
     T INF = Minimize ? numeric_limits<T>::max() : numeric_limits<T>::lowest();
     auto comp = [](T a, T b) -> bool
     {
-        return Minimize ? a >= b : a <= b;
+        return Minimize ? a <= b : a >= b;
     };
 
     vector<long long> fib = {1, 1};
@@ -47,15 +47,22 @@ pair<long long, T> fibonacci_search(long long x_low, long long x_high, function<
 
         if (comp(fl, fr))
         {
-            l_idx = mid_l_idx;
+            r_idx = mid_r_idx;
         }
         else
         {
-            r_idx = mid_r_idx;
+            l_idx = mid_l_idx;
         }
 
         fib.pop_back();
     }
 
-    return {l_idx + offset, eval(l_idx)};
+    if (comp(eval(l_idx), eval(r_idx)))
+    {
+        return {l_idx + offset, eval(l_idx)};
+    }
+    else
+    {
+        return {r_idx + offset, eval(r_idx)};
+    }
 }
