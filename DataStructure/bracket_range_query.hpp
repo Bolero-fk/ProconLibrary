@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "atcoder/lazysegtree"
+#include <atcoder/lazysegtree>
 using namespace std;
 
 class BracketRangeQuery
