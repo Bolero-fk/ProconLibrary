@@ -1,8 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// 二次元セグメント木
-// ACLを基に作った
 template <class S, auto op, auto e>
 struct segtree2d
 {
