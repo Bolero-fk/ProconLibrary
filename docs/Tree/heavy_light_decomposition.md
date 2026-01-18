@@ -2,7 +2,6 @@
 title: Heavy-Light 分解 (HLD)
 documentation_of: //Tree/heavy_light_decomposition.hpp
 parent: Tree
-nav_order: 2
 ---
 
 # Heavy-Light 分解

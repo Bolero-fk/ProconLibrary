@@ -2,7 +2,6 @@
 title: 二次元セグメント木
 documentation_of: //DataStructure/2d_segment_tree.hpp
 parent: Data Structure
-nav_order: 8
 ---
 
 # 二次元セグメント木

@@ -2,7 +2,6 @@
 title: 括弧列区間クエリ
 documentation_of: //DataStructure/bracket_range_query.hpp
 parent: Data Structure
-nav_order: 7
 ---
 
 # 括弧列区間クエリ

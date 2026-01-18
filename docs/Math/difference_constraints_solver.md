@@ -2,7 +2,6 @@
 title: 差分制約系 (牛ゲー)
 documentation_of: //Math/difference_constraints_solver.hpp
 parent: Math
-nav_order: 1
 ---
 
 # 差分制約系 (牛ゲー)

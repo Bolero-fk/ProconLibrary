@@ -2,7 +2,6 @@
 title: 重み付きUnion Find
 documentation_of: //DataStructure/weighted_union_find.hpp
 parent: Data Structure
-nav_order: 5
 ---
 
 # 重み付きUnion Find

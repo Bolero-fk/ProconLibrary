@@ -2,7 +2,6 @@
 title: 二項係数 (素数 mod)
 documentation_of: //EnumerativeCombinatorics/binomial_coefficient_prime_mod.hpp
 parent: Enumerative Combinatorics
-nav_order: 1
 ---
 
 # 二項係数 (素数 mod)

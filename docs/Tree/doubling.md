@@ -2,7 +2,6 @@
 title: ダブリング
 documentation_of: //Tree/doubling.hpp
 parent: Tree
-nav_order: 1
 ---
 
 # ダブリング

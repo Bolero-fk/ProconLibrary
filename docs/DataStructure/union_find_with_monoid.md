@@ -2,7 +2,6 @@
 title: モノイド付きUnion Find
 documentation_of: //DataStructure/union_find_with_monoid.hpp
 parent: Data Structure
-nav_order: 4
 ---
 
 # モノイド付きUnion Find (`UnionFindWithMonoid`)

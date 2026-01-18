@@ -2,7 +2,6 @@
 title: Interval Set
 documentation_of: //DataStructure/interval_set.hpp
 parent: Data Structure
-nav_order: 6
 ---
 
 # Interval Set

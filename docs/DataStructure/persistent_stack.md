@@ -2,7 +2,6 @@
 title: 永続スタック
 documentation_of: //DataStructure/persistent_stack.hpp
 parent: Data Structure
-nav_order: 3
 ---
 
 # 永続スタック
