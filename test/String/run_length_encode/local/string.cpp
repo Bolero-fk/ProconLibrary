@@ -1,4 +1,4 @@
-// competitive-verifier: PROBLEM https://www.hackerrank.com/contests/magic-lines-july-2015/challenges/run-length-encoding
+// competitive-verifier: LOCALCASE ./cases/string
 
 #include "String/run_length_encode.hpp"
 #include <bits/stdc++.h>
