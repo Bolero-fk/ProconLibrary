@@ -1,6 +1,6 @@
-// competitive-verifier: PROBLEM https://atcoder.jp/contests/abc296/tasks/abc296_g
-// competitive-verifier: IGNORE
-// AtCoder's test cases are now private.
+// competitive-verifier: LOCALCASE ./cases/basic
+// Verification test based on AtCoder ABC296 G - Polygon and Points.
+// Problem: https://atcoder.jp/contests/abc273/tasks/abc296_g
 
 #include "Geometry/convex_algo/contains_point.hpp"
 #include <bits/stdc++.h>
