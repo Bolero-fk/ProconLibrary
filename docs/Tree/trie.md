@@ -68,7 +68,7 @@ int insert(const Container& v)
 - `T` は `unordered_map<T, int>` のキーとして利用できること
 
 **計算量**
-- $O(|v|)$ 期待時間
+- $O(\lvert v \rvert)$
 
 ---
 
@@ -97,7 +97,7 @@ f(node_id, is_last)
 - `Func` が `f(int, bool)` として呼び出せること
 
 **計算量**
-- $O(|v|)$ 期待時間
+- $O(\lvert v \rvert)$
 
 ---
 
@@ -130,4 +130,4 @@ next_node_ids.clear()
 - `Container::value_type` が `T` と一致すること
 
 **計算量**
-- $O(|prefix|)$ 期待時間
+- $O(\lvert prefix \rvert)$ 

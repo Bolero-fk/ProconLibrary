@@ -52,7 +52,7 @@ int insert(const Container& pattern)
 - `T` は `unordered_map<T, int>` のキーとして利用できること
 
 **計算量**
-- $O(|pattern|)$ 期待時間
+- $O(\lvert pattern \rvert)$
 
 ---
 
@@ -70,7 +70,7 @@ void build()
 `move`、`is_matched`、`get_suffix_link` を使う前に、この関数を呼ぶ必要があります。
 
 **計算量**
-- $O(M \alpha)$ 期待時間
+- $O(M \alpha)$
 
 ここで、`M` は Trie のノード数、`\alpha` は各ノードから出ている遷移数の合計に対する走査量です。  
 実装上は、Trie に存在する辺を BFS で 1 回ずつ処理します。
@@ -93,7 +93,7 @@ int move(int node_id, const T& value) const
 - $0 \leq node_id < size()$
 
 **計算量**
-- 最悪 $O(\text{状態の深さ})$ 期待時間
+- 最悪 $O(\text{状態の深さ})$
 
 ---
 
