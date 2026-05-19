@@ -1,9 +1,18 @@
 exclude:
   - memo.md
   - README.md
+  - docs_skill.md
+
+search_enabled: true
 
 search:
-  tokenizer_separator: /[\s\-/\u{3000}-\u{301C}\u{3041}-\u{3096}\u{30A1}-\u{30FA}]+/gu
+  tokenizer_separator: /[\s\-\/\u{3000}-\u{303F}、。・「」『』（）【】［］]+/gu
+
+heading_anchors: true
+
+aux_links:
+  "GitHub":
+    - "https://github.com/bolero-fk/ProconLibrary"
 
 # theme: just-the-docs
-remote_theme: just-the-docs/just-the-docs@v0.10.1
+remote_theme: just-the-docs/just-the-docs@v0.12.0
