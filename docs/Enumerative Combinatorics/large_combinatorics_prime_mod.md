@@ -1,6 +1,6 @@
 ---
 title: 組合せ・順列・重複組合せ (大きい n・素数 mod)
-documentation_of: //EnumerativeCombinatorics/large_combinatorics.hpp
+documentation_of: //EnumerativeCombinatorics/large_combinatorics_prime_mod.hpp
 parent: Enumerative Combinatorics
 ---
 

@@ -1,60 +1,117 @@
 #include <bits/stdc++.h>
-using namespace std;
 
+// n が比較的小さく(n <= 10^7程度)、n < mod を満たす場合に使う組合せライブラリ。
+// n まで階乗と階乗逆元を前計算し、P(n, r), C(n, r), H(n, r) を O(1) で計算する。
+// n が非常に大きく、r が小さい場合は large_combinatorics を使う。
 template <class mint>
 class combinatorics
 {
 private:
-    int max_n;
-    vector<mint> fact, ifact;
+    std::vector<mint> fact;
+    std::vector<mint> inv;
+    std::vector<mint> fact_inv;
 
-public:
-    combinatorics(int n) : max_n(n), fact(n + 1), ifact(n + 1)
+    void expand(int n)
     {
+        assert(0 <= n);
+
+        // fact[n] を使うため、n >= mod ではこのライブラリは使えない。
+        // n が大きい場合は large_combinatorics を使う。
         assert(n < mint::mod());
 
-        fact[0] = 1;
-        for (int i = 1; i <= n; ++i)
+        int old_size = (int)fact.size();
+        if (n < old_size)
+        {
+            return;
+        }
+
+        int new_size = n + 1;
+
+        fact.resize(new_size);
+        inv.resize(new_size);
+        fact_inv.resize(new_size);
+
+        if (old_size == 0)
+        {
+            fact[0] = 1;
+            fact_inv[0] = 1;
+            old_size = 1;
+        }
+
+        if (old_size == 1 && new_size >= 2)
+        {
+            fact[1] = 1;
+            inv[1] = 1;
+            fact_inv[1] = 1;
+            old_size = 2;
+        }
+
+        for (int i = old_size; i < new_size; i++)
+        {
             fact[i] = fact[i - 1] * i;
-
-        ifact[n] = fact[n].inv();
-        for (int i = n; i >= 1; --i)
-            ifact[i - 1] = ifact[i] * i;
+            inv[i] = -mint(mint::mod() / i) * inv[mint::mod() % i];
+            fact_inv[i] = fact_inv[i - 1] * inv[i];
+        }
     }
 
-    mint operator()(int n, int k)
+public:
+    combinatorics() = default;
+
+    combinatorics(int n)
     {
-        return C(n, k);
+        expand(n);
     }
 
-    // nCr
-    mint C(int n, int r)
+    mint operator()(int n, int r)
     {
-        if (n < 0 || r < 0 || r > n)
-            return 0;
-        assert(n <= max_n);
-
-        return fact[n] * ifact[r] * ifact[n - r];
+        return C(n, r);
     }
 
-    // nPr
     mint P(int n, int r)
     {
-        if (n < 0 || r < 0 || r > n)
+        if (n < 0 || r < 0)
+        {
             return 0;
-        assert(n <= max_n);
+        }
 
-        return fact[n] * ifact[n - r];
+        if (n < r)
+        {
+            return 0;
+        }
+
+        expand(n);
+
+        return fact[n] * fact_inv[n - r];
     }
 
-    // nHr
+    mint C(int n, int r)
+    {
+        if (n < 0 || r < 0)
+        {
+            return 0;
+        }
+
+        if (n < r)
+        {
+            return 0;
+        }
+
+        expand(n);
+
+        return fact[n] * fact_inv[r] * fact_inv[n - r];
+    }
+
     mint H(int n, int r)
     {
         if (n < 0 || r < 0)
+        {
             return 0;
+        }
 
         if (n == 0)
-            return r == 0 ? 1 : 0;
+        {
+            return r == 0 ? mint(1) : mint(0);
+        }
 
         return C(n + r - 1, r);
     }

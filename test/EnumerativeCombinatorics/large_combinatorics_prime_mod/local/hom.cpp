@@ -1,6 +1,6 @@
 // competitive-verifier: LOCALCASE ./cases/hom
 
-#include "EnumerativeCombinatorics/large_combinatorics.hpp"
+#include "EnumerativeCombinatorics/large_combinatorics_prime_mod.hpp"
 #include <atcoder/modint>
 #include <bits/stdc++.h>
 

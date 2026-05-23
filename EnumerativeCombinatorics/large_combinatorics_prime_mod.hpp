@@ -1,8 +1,8 @@
-#pragma once
+#include <bits/stdc++.h>
 
-#include <cassert>
-#include <vector>
-
+// n が非常に大きく、r が比較的小さい(r <= 10^7程度)場合に使う組合せライブラリ。
+// P(n, r), C(n, r), H(n, r) を O(r) で計算する。
+// n が前計算可能な大きさで、大量に問い合わせる場合は combinatorics を使う。
 template <class mint>
 class large_combinatorics
 {
@@ -13,6 +13,10 @@ private:
     void expand(long long r)
     {
         assert(0 <= r);
+
+        // C(n, r), H(n, r) では r! の逆元を使うため、
+        // r >= mod ではこのライブラリは使えない。
+        // その場合は Lucas の定理など別手法が必要。
         assert(r < mint::mod());
 
         int old_size = (int)fact_inv.size();
