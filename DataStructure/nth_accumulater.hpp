@@ -4,12 +4,59 @@ using namespace std;
 template <typename T, int DIMENSION_SIZE>
 class nthAccumulater
 {
-private:
+public:
     static_assert(0 < DIMENSION_SIZE, "DIMENSION_SIZE must be positive.");
 
+    using IntArray = array<int, DIMENSION_SIZE>;
+    using LongArray = array<long long, DIMENSION_SIZE>;
+    using Entry = pair<IntArray, T>;
+
+private:
     vector<T> values;
-    array<int, DIMENSION_SIZE> sizes;
+    IntArray sizes;
     array<int, DIMENSION_SIZE + 1> sum_sizes;
+
+    static IntArray to_int_array(initializer_list<int> a)
+    {
+        assert((int)a.size() == DIMENSION_SIZE);
+
+        IntArray result{};
+        int i = 0;
+
+        for (const int x : a)
+        {
+            result[i++] = x;
+        }
+
+        return result;
+    }
+
+    static LongArray to_long_array(const IntArray &a)
+    {
+        LongArray result{};
+
+        for (int i = 0; i < DIMENSION_SIZE; i++)
+        {
+            result[i] = a[i];
+        }
+
+        return result;
+    }
+
+    static LongArray to_long_array(initializer_list<long long> a)
+    {
+        assert((int)a.size() == DIMENSION_SIZE);
+
+        LongArray result{};
+        int i = 0;
+
+        for (const long long x : a)
+        {
+            result[i++] = x;
+        }
+
+        return result;
+    }
 
     void init()
     {
@@ -20,7 +67,7 @@ private:
             assert(0 < sizes[i]);
 
             sum_sizes[i] = sum_size;
-            sum_size *= sizes[i] + 1; // 累積和用に 0 番目を追加するため +1 する
+            sum_size *= sizes[i] + 1; // 0 番目は累積和用
         }
 
         sum_sizes[DIMENSION_SIZE] = sum_size;
@@ -29,28 +76,36 @@ private:
         values.assign(sum_size, T{});
     }
 
-    int get_index(const array<int, DIMENSION_SIZE> &indexes) const
+    int get_index(const IntArray &indexes) const
     {
         int result = 0;
 
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
+            assert(0 <= indexes[i] && indexes[i] <= sizes[i]);
             result += indexes[i] * sum_sizes[i];
         }
 
         return result;
     }
 
-    int get_index(const array<long long, DIMENSION_SIZE> &indexes) const
+    void set(const IntArray &indexes, const T &value)
     {
-        int result = 0;
+        values[get_index(indexes)] = value;
+    }
+
+    // 外部から見た 0-indexed の座標に value を加算する。
+    void add_value(const IntArray &indexes, const T &value)
+    {
+        IntArray shifted_indexes{};
 
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
-            result += indexes[i] * sum_sizes[i];
+            assert(0 <= indexes[i] && indexes[i] < sizes[i]);
+            shifted_indexes[i] = indexes[i] + 1;
         }
 
-        return result;
+        values[get_index(shifted_indexes)] += value;
     }
 
     void build()
@@ -77,7 +132,7 @@ private:
         }
     }
 
-    T sum_from_origin(const unsigned int bit_mask, const array<long long, DIMENSION_SIZE> &indexes) const
+    T sum_from_origin(const unsigned int bit_mask, const LongArray &indexes) const
     {
         T result = T{};
         unsigned int sub_bit = bit_mask;
@@ -85,7 +140,7 @@ private:
         do
         {
             T count = T{1};
-            array<int, DIMENSION_SIZE> query_index{};
+            IntArray query_index{};
 
             for (int i = 0; i < DIMENSION_SIZE; i++)
             {
@@ -96,12 +151,11 @@ private:
                 }
                 else
                 {
-                    query_index[i] = indexes[i] % sizes[i];
+                    query_index[i] = static_cast<int>(indexes[i] % sizes[i]);
                 }
             }
 
-            result += count * get(query_index);
-
+            result += count * values[get_index(query_index)];
             sub_bit = (sub_bit - 1) & bit_mask;
         } while (sub_bit != bit_mask);
 
@@ -113,19 +167,21 @@ private:
     {
         if constexpr (is_arithmetic_v<V>)
         {
+            assert(depth == DIMENSION_SIZE);
             return;
         }
         else
         {
+            assert(depth < DIMENSION_SIZE);
             assert(!v.empty());
 
-            sizes[depth] = v.size();
+            sizes[depth] = static_cast<int>(v.size());
             set_sizes(v[0], depth + 1);
         }
     }
 
     template <typename V>
-    void set_values(const V &v, array<int, DIMENSION_SIZE> &index, const int depth = 0)
+    void set_values(const V &v, IntArray &index, const int depth = 0)
     {
         if constexpr (is_arithmetic_v<V>)
         {
@@ -133,6 +189,8 @@ private:
         }
         else
         {
+            assert((int)v.size() == sizes[depth]);
+
             for (int i = 0; i < (int)v.size(); i++)
             {
                 index[depth] = i + 1;
@@ -141,43 +199,8 @@ private:
         }
     }
 
-public:
-    template <typename V>
-    nthAccumulater(const vector<V> &v)
-    {
-        set_sizes(v);
-
-        init();
-
-        array<int, DIMENSION_SIZE> index{};
-        set_values(v, index);
-
-        build();
-    }
-
-    T get(const array<int, DIMENSION_SIZE> &indexes) const
-    {
-        return get(get_index(indexes));
-    }
-
-    T get(const int index) const
-    {
-        assert(0 <= index && index < sum_sizes[DIMENSION_SIZE]);
-        return values[index];
-    }
-
-    void set(const array<int, DIMENSION_SIZE> &indexes, const T &value)
-    {
-        set(get_index(indexes), value);
-    }
-
-    void set(const int index, const T &value)
-    {
-        assert(0 <= index && index < sum_sizes[DIMENSION_SIZE]);
-        values[index] = value;
-    }
-
-    T sum(const array<long long, DIMENSION_SIZE> &l, const array<long long, DIMENSION_SIZE> &r) const
+    template <typename L, typename R>
+    T sum_impl(const L &l, const R &r) const
     {
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
@@ -193,12 +216,10 @@ public:
             const int s0 = sum_sizes[0];
             const int s1 = sum_sizes[1];
 
-            const int l0 = l[0];
-            const int r0 = r[0];
-            const int l1 = l[1];
-            const int r1 = r[1];
-
-            return values[r0 * s0 + r1 * s1] - values[l0 * s0 + r1 * s1] - values[r0 * s0 + l1 * s1] + values[l0 * s0 + l1 * s1];
+            return values[r[0] * s0 + r[1] * s1] -
+                   values[l[0] * s0 + r[1] * s1] -
+                   values[r[0] * s0 + l[1] * s1] +
+                   values[l[0] * s0 + l[1] * s1];
         }
         else if constexpr (DIMENSION_SIZE == 3)
         {
@@ -206,19 +227,19 @@ public:
             const int s1 = sum_sizes[1];
             const int s2 = sum_sizes[2];
 
-            const int l0 = l[0];
-            const int r0 = r[0];
-            const int l1 = l[1];
-            const int r1 = r[1];
-            const int l2 = l[2];
-            const int r2 = r[2];
-
-            auto index = [&](const int a, const int b, const int c) -> int
+            auto index = [&](const auto x, const auto y, const auto z)
             {
-                return a * s0 + b * s1 + c * s2;
+                return x * s0 + y * s1 + z * s2;
             };
 
-            return values[index(r0, r1, r2)] - values[index(l0, r1, r2)] - values[index(r0, l1, r2)] - values[index(r0, r1, l2)] + values[index(l0, l1, r2)] + values[index(l0, r1, l2)] + values[index(r0, l1, l2)] - values[index(l0, l1, l2)];
+            return values[index(r[0], r[1], r[2])] -
+                   values[index(l[0], r[1], r[2])] -
+                   values[index(r[0], l[1], r[2])] -
+                   values[index(r[0], r[1], l[2])] +
+                   values[index(l[0], l[1], r[2])] +
+                   values[index(l[0], r[1], l[2])] +
+                   values[index(r[0], l[1], l[2])] -
+                   values[index(l[0], l[1], l[2])];
         }
         else
         {
@@ -226,7 +247,7 @@ public:
 
             for (unsigned int bit = 0; bit < (1u << DIMENSION_SIZE); bit++)
             {
-                int index = 0;
+                long long index = 0;
 
                 for (int i = 0; i < DIMENSION_SIZE; i++)
                 {
@@ -247,14 +268,14 @@ public:
         }
     }
 
-    T cyclic_sum(array<long long, DIMENSION_SIZE> l, array<long long, DIMENSION_SIZE> r) const
+    T cyclic_sum_impl(LongArray l, LongArray r) const
     {
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
             assert(l[i] < r[i]);
         }
 
-        // l の値が負数の場合、正数に変換する。
+        // l を非負に寄せる。
         for (int i = 0; i < DIMENSION_SIZE; i++)
         {
             if (l[i] < 0)
@@ -271,7 +292,7 @@ public:
 
         for (unsigned int bit = 0; bit < (1u << DIMENSION_SIZE); bit++)
         {
-            array<long long, DIMENSION_SIZE> indexes{};
+            LongArray indexes{};
             unsigned int bit_mask = 0;
 
             for (int i = 0; i < DIMENSION_SIZE; i++)
@@ -295,5 +316,71 @@ public:
         }
 
         return result;
+    }
+
+public:
+    template <typename V>
+    nthAccumulater(const vector<V> &v)
+    {
+        set_sizes(v);
+
+        init();
+
+        IntArray index{};
+        set_values(v, index);
+
+        build();
+    }
+
+    // 各次元の大きさと {index, value} の列から構築する。同じ index は加算する。
+    nthAccumulater(const IntArray &sizes_, const vector<Entry> &entries)
+        : sizes(sizes_)
+    {
+        init();
+
+        for (const auto &[indexes, value] : entries)
+        {
+            add_value(indexes, value);
+        }
+
+        build();
+    }
+
+    nthAccumulater(initializer_list<int> sizes_, const vector<Entry> &entries)
+        : nthAccumulater(to_int_array(sizes_), entries)
+    {
+    }
+
+    T sum(const IntArray &l, const IntArray &r) const
+    {
+        return sum_impl(l, r);
+    }
+
+    T sum(const LongArray &l, const LongArray &r) const
+    {
+        return sum_impl(l, r);
+    }
+
+    T sum(initializer_list<long long> l, initializer_list<long long> r) const
+    {
+        assert((int)l.size() == DIMENSION_SIZE);
+        assert((int)r.size() == DIMENSION_SIZE);
+
+        return sum_impl(l.begin(), r.begin());
+    }
+
+    T cyclic_sum(const IntArray &l, const IntArray &r) const
+    {
+        return cyclic_sum_impl(to_long_array(l), to_long_array(r));
+    }
+
+    T cyclic_sum(const LongArray &l, const LongArray &r) const
+    {
+        return cyclic_sum_impl(l, r);
+    }
+
+    T cyclic_sum(initializer_list<long long> l, initializer_list<long long> r) const
+    {
+        return cyclic_sum_impl(to_long_array(l), to_long_array(r));
     }
 };
