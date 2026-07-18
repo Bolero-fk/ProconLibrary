@@ -1,329 +1,283 @@
 name: verify
+
 on:
   push:
     branches:
-      - "main"
+      - main
     paths:
-      - '**.cpp'
-      - '**.hpp'
-      - '**/docs/**.md'
+      - "**/*.cpp"
+      - "**/*.hpp"
+      - "**/docs/**/*.md"
+      - ".competitive-verifier/**"
+      - ".verify-helper/**"
+      - "scripts/**"
+      - ".github/workflows/verify.yml"
   workflow_dispatch:
     inputs:
       use_cache:
-        description: 'Use cache?'
+        description: "前回の検証結果を利用する"
         required: true
-        default: 'true'
+        default: true
         type: boolean
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# 各ジョブに必要な最小権限を、Workflow全体の既定値として設定する。
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Allow one concurrent deployment
+# 同じブランチで新しい実行が始まった場合、古い実行をキャンセルする。
 concurrency:
-  group: "pages"
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # 検証対象ファイルと前回の検証結果を準備し、後続ジョブへ渡す。
   setup:
     runs-on: ubuntu-22.04
-    outputs:
-      dropbox_token: ${{steps.set_dropbox_token.outputs.dropbox_token}}
+    permissions:
+      contents: read
+      actions: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
-      - name: Set use_cache environment variable
-        run: |
-          if [ -z "${{ github.event.inputs.use_cache }}" ]; then
-            echo "USE_CACHE=true" >> $GITHUB_ENV
-          else
-            echo "USE_CACHE=${{ github.event.inputs.use_cache }}" >> $GITHUB_ENV
-          fi
-      
       - name: Set up competitive-verifier
         uses: competitive-verifier/actions/setup@v2
         with:
           cache-pip: true
 
       - name: Download previous verify result
-        if: env.USE_CACHE == 'true'
-        run: |
-          workflow_ids=$(gh run list --workflow verify --limit 10 --json databaseId -q '.[].databaseId')
-          for workflow_id in $workflow_ids; do
-            # Try download Result-cache
-            if gh run download $workflow_id --name "Result-cache" --dir ./.artifacts 2>&1;then
-              if [ -f "./.artifacts/cache.json" ]; then
-                mv ./.artifacts/cache.json ./.artifacts/previous_result.json
-                commit_sha=$(gh run view $workflow_id --json headSha -q '.headSha')
-                echo "COMMIT_SHA=$commit_sha" >> $GITHUB_ENV
-                exit 0
-              else
-                rm -rf ./.artifacts
-              fi
-            else
-              rm -rf ./.artifacts
-            fi
-          done
-          echo "No Result-cache artifact found in the recent verify runs."
-          echo "USE_CACHE=false" >> $GITHUB_ENV
+        if: github.event_name != 'workflow_dispatch' || inputs.use_cache
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-
-      # Generate verify_files contains all test files 
-      - name: all test oj-resolve
-        if: env.USE_CACHE == 'true'
-        uses: competitive-verifier/actions/oj-resolve@v2
-        with:
-          output-path: previous_verify_files.json
-          # Specify patterns 
-          # include:
-          exclude: scripts/*
-          # If you have config.toml
-          config: .verify-helper/config.toml
-
-      - name: parse-doxygen
-        if: env.USE_CACHE == 'true'
-        uses: competitive-verifier/actions/parse-doxygen@v2
-        with:
-          verify-files: previous_verify_files.json
-
-      - name: Extracrt test file
-        if: env.USE_CACHE == 'true'
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "using commit id: ${{ env.COMMIT_SHA }}"
-          git fetch origin ${{ env.COMMIT_SHA }}
+          workflow_ids=$(
+            gh run list \
+              --workflow verify \
+              --limit 10 \
+              --json databaseId \
+              --jq '.[].databaseId'
+          )
 
-          include_files=$(python3 ./scripts/extract_tests_containing_diff.py ${{ env.COMMIT_SHA }})
+          for workflow_id in $workflow_ids; do
+            rm -rf .artifacts
 
-          # Add a dummy filename to ensure nothing is included.
-          if [ -z "$include_files" ]; then
-            include_files="no-directory"
+            if ! gh run download "$workflow_id" \
+              --name "Result-cache" \
+              --dir .artifacts 2>&1; then
+              continue
+            fi
+
+            if [ ! -f .artifacts/cache.json ]; then
+              continue
+            fi
+
+            mv .artifacts/cache.json .artifacts/previous_result.json
+            exit 0
+          done
+
+          rm -rf .artifacts
+          echo "直近のverify実行にResult-cache Artifactが見つかりませんでした。"
+
+      - name: Prepare previous verify result
+        run: |
+          mkdir -p .artifacts
+
+          if [ ! -f .artifacts/previous_result.json ]; then
+            echo '{"total_seconds": 0, "files": {}}' \
+              > .artifacts/previous_result.json
           fi
 
-          echo "INCLUDE_FILES_LIST=$include_files" >> $GITHUB_ENV
-
-      - name: Filter previous.json
-        if: env.USE_CACHE == 'true'
-        run: |
-          python3 ./scripts/filter_test_files_from_json.py "./.artifacts/previous_result.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/result.json
-          python3 ./scripts/filter_test_files_from_json.py "./previous_verify_files.json" "${{ env.INCLUDE_FILES_LIST }}" > ./.artifacts/verify_files.json
-
-      - name: Upload Result-previous
-        if: env.USE_CACHE == 'true'
-        uses: actions/upload-artifact@v4
+      - name: Upload previous verify result
+        uses: actions/upload-artifact@v7
         with:
-          name: Result-previous
-          path: ./.artifacts/result.json
+          name: Previous-verify-result
+          path: .artifacts/previous_result.json
           retention-days: 1
 
-      - name: Upload verify-files-previous
-        if: env.USE_CACHE == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Previous-verify-files-json
-          path: ./.artifacts/verify_files.json
-          retention-days: 1
-
-      # Initialize your own environment for resolving.
-      - name: oj-resolve
+      - name: Resolve verification files
         uses: competitive-verifier/actions/oj-resolve@v2
         with:
           output-path: verify_files.json
-          # Specify patterns 
-          include: ${{ env.INCLUDE_FILES_LIST }}
           exclude: scripts/*
-          # If you have config.toml
           config: .verify-helper/config.toml
 
-      - name: parse-doxygen
+      - name: Parse Doxygen comments
         uses: competitive-verifier/actions/parse-doxygen@v2
         with:
           verify-files: verify_files.json
 
-      - name: Upload verify_files.json
+      - name: Upload verification files
         uses: competitive-verifier/actions/upload-verify-artifact@v2
         with:
           file: verify_files.json
           retention-days: 1
 
-      - name: Check bundled
-        id: test-bundled
-        run: |
-          echo "count=$(find .competitive-verifier/bundled/ -type f | wc -l)" >> $GITHUB_OUTPUT
-      - name: Upload bundled
-        uses: actions/upload-artifact@v4
-        if: steps.test-bundled.outputs.count > 0
+      - name: Upload bundled files
+        uses: actions/upload-artifact@v7
         with:
           name: Bundled-${{ runner.os }}
           path: .competitive-verifier/bundled
+          if-no-files-found: ignore
           retention-days: 1
 
-      - name: Set dropbox token
-        id: set_dropbox_token
-        run: |
-          DROPBOX_TOKEN=$( \
-            curl https://api.dropbox.com/oauth2/token \
-              -d grant_type=refresh_token \
-              -d refresh_token=$DROPBOX_REFRESH_TOKEN \
-              -u $DROPBOX_APP_KEY:$DROPBOX_APP_SECRET \
-            | jq -r '.["access_token"]' \
-          )
-          echo "::add-mask::$DROPBOX_TOKEN"
-          DROPBOX_TOKEN_ENC=$(echo "$DROPBOX_TOKEN" | openssl enc -aes256 -e -pbkdf2 -base64 -A -k '${{secrets.AES256_KEY}}')
-          echo "dropbox_token=$DROPBOX_TOKEN_ENC" >> $GITHUB_OUTPUT
-        env:
-          DROPBOX_APP_KEY: ${{secrets.DROPBOX_APP_KEY}}
-          DROPBOX_APP_SECRET: ${{secrets.DROPBOX_APP_SECRET}}
-          DROPBOX_REFRESH_TOKEN: ${{secrets.DROPBOX_REFRESH_TOKEN}}
-
+  # 検証対象を20分割し、matrixジョブで並列に実行する。
   verify:
+    needs: setup
     runs-on: ubuntu-22.04
-    needs: [setup]
     env:
       SPLIT_SIZE: "20"
     strategy:
       matrix:
-        # prettier-ignore
         index:
           ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
            "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
+          # 更新されたファイルを正しく判定するため、Gitの全履歴を取得する。
+          fetch-depth: 0
           submodules: recursive
 
-      - name: Recieve dropbox token
-        run: |
-          DROPBOX_TOKEN=$(echo "${{needs.setup.outputs.dropbox_token}}" | openssl enc -aes256 -d -pbkdf2 -base64 -A -k '${{secrets.AES256_KEY}}')
-          echo "::add-mask::$DROPBOX_TOKEN"
-          echo "DROPBOX_TOKEN=$DROPBOX_TOKEN" >> $GITHUB_ENV
-
-      - name: Download verify_files.json
+      - name: Download verification files
         uses: competitive-verifier/actions/download-verify-artifact@v2
+
+      - name: Download previous verify result
+        uses: actions/download-artifact@v8
+        with:
+          name: Previous-verify-result
+          path: ${{ runner.temp }}/previous-verify-result
 
       - name: Set up competitive-verifier
         uses: competitive-verifier/actions/setup@v2
         with:
           cache-pip: true
 
-      - name: Verify
+      - name: Run verification
         uses: competitive-verifier/actions/verify@v2
         with:
-          destination: ${{runner.temp}}/result.json
+          destination: ${{ runner.temp }}/result.json
+          prev-result: ${{ runner.temp }}/previous-verify-result/previous_result.json
           split-size: ${{ env.SPLIT_SIZE }}
           split-index: ${{ matrix.index }}
           timeout: 1800
         env:
-          YUKICODER_TOKEN: ${{secrets.YUKICODER_TOKEN}}
+          YUKICODER_TOKEN: ${{ secrets.YUKICODER_TOKEN }}
 
-      - name: Upload result artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload verification result
+        uses: actions/upload-artifact@v7
         with:
           name: Result-${{ runner.os }}-${{ matrix.index }}
-          path: ${{runner.temp}}/result.json
+          path: ${{ runner.temp }}/result.json
           retention-days: 1
 
+  # 検証結果からドキュメントを生成し、結果確認と次回用キャッシュ作成を行う。
   docs-and-check:
+    needs: verify
     runs-on: ubuntu-22.04
-    needs: [verify]
     outputs:
-      upload-pages: ${{steps.upload-pages.outcome == 'success'}}
+      upload-pages: ${{ steps.upload-pages.outcome == 'success' }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2147483647
-  
-      - name: Download verify_files.json and all artifacts
-        id: all-artifacts
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download verification files and artifacts
+        id: download-artifacts
         uses: competitive-verifier/actions/download-verify-artifact@v2
         with:
           download-all: true
-          artifact-root: .artifacts/
+          artifact-root: .artifacts
           set-env: false
-  
-      - name: Extract bundled
-        shell: bash
+
+      - name: Extract bundled files
+        env:
+          BUNDLED_ARTIFACT_DIR: .artifacts/Bundled-${{ runner.os }}
         run: |
           rm -rf .competitive-verifier/bundled
-          if test -d "$SRCDIR"; then
-            mkdir -p .competitive-verifier/
-            mv "$SRCDIR" .competitive-verifier/bundled
-          else
-            echo "$SRCDIR does not exist."
+
+          if [ ! -d "$BUNDLED_ARTIFACT_DIR" ]; then
+            echo "$BUNDLED_ARTIFACT_DIR が存在しないため、展開をスキップします。"
+            exit 0
           fi
-        env:
-          SRCDIR: .artifacts/Bundled-${{ runner.os }}
-  
+
+          mkdir -p .competitive-verifier
+          mv "$BUNDLED_ARTIFACT_DIR" .competitive-verifier/bundled
+
       - name: Set up competitive-verifier
         uses: competitive-verifier/actions/setup@v2
         with:
           cache-pip: true
 
-      - name: Merge json
-        uses: competitive-verifier/actions/merge-verify-files@v2
-        with:
-          verify-files: .artifacts/*-verify-files-json/verify_files.json
-          output-path: .artifacts/verify_files.json
-
-      - name: Docs
+      - name: Generate documentation
         uses: competitive-verifier/actions/docs@v2
         with:
-          verify-files: .artifacts/verify_files.json
+          verify-files: ${{ steps.download-artifacts.outputs.json-path }}
           verify-result: .artifacts/Result-*/result.json
           destination: _jekyll
           write-summary: true
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
 
-      - name: Build with Jekyll
+      - name: Build site with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
           source: _jekyll
           destination: _site
 
-      - name: Modify source code to enable Japanese search functionality
+      - name: Enable Japanese search
         run: |
-          sudo sed -i 's/var index = lunr(function(){/var index = lunr(function(){\n        this.use(lunr.multiLanguage('\''en'\'', '\''ja'\''));/' _site/assets/js/just-the-docs.js
+          sudo python3 scripts/enable_japanese_search.py _site/assets/js/just-the-docs.js
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         id: upload-pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
-      - name: Check
+      - name: Check verification results
         uses: competitive-verifier/actions/check@v2
         with:
           verify-result: .artifacts/Result-*/result.json
 
-      - name: Bundle verification result
-        shell: bash
+      - name: Merge verification results
+        uses: competitive-verifier/actions/merge-result@v2
+        with:
+          result-files: .artifacts/Result-*/result.json
+          output-path: .artifacts/merge.json
+
+      - name: Prepare cache result
         run: |
-          JSON_FILES=./.artifacts/Result-*/result.json
-          python3 ./scripts/merge_json_files.py $JSON_FILES > "./.artifacts/merge.json"
-          jq '{total_seconds: 0} + .' "./.artifacts/merge.json" > "./.artifacts/cache.json"
-          sed -i "s/\"newest\": true/\"newest\": false/g" "./.artifacts/cache.json"
+          jq '
+            .total_seconds = 0
+            | .files[]?.newest = false
+          ' .artifacts/merge.json > .artifacts/cache.json
 
       - name: Upload cache result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Result-cache
-          path: ./.artifacts/cache.json
+          path: .artifacts/cache.json
           retention-days: 90
 
+  # サイトのビルドに成功していれば、検証結果にかかわらずPagesへデプロイする。
   deploy:
-    if: (success() || failure()) && github.ref == 'refs/heads/main' && needs.docs-and-check.outputs.upload-pages == 'true'
     needs: docs-and-check
+    if: >-
+      (success() || failure()) &&
+      github.ref == 'refs/heads/main' &&
+      needs.docs-and-check.outputs.upload-pages == 'true'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-22.04
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
