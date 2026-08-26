@@ -121,6 +121,24 @@ public:
         return sz[u];
     }
 
+    int get_depth(int v)
+    {
+        assert(0 <= v && v < n);
+
+        ensure_built();
+        return depth[v];
+    }
+
+    int get_distance(int u, int v)
+    {
+        assert(0 <= u && u < n);
+        assert(0 <= v && v < n);
+
+        ensure_built();
+        int ancestor = lca(u, v);
+        return depth[u] + depth[v] - 2 * depth[ancestor];
+    }
+
 private:
     int n;
     vector<vector<int>> edges;

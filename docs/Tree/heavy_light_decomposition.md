@@ -155,3 +155,31 @@ int hld.get_subtree_size(int u);
 **計算量**
 
 * $O(1)$
+
+## get_depth
+
+`int hld.get_depth(int v);`
+
+頂点 $v$ の根からの深さを返します。
+
+**制約**
+
+* $0 \leq v < n$
+
+**計算量**
+
+* $O(1)$
+
+## get_distance
+
+`int hld.get_distance(int u, int v);`
+
+頂点 $u, v$ 間の距離（パス上の辺の本数）を返します。
+
+**制約**
+
+* $0 \leq u, v < n$
+
+**計算量**
+
+* $O(\log n)$
