@@ -4,6 +4,7 @@ using namespace std;
 
 class BracketRangeQuery
 {
+public:
     struct S
     {
         int matched;
@@ -11,6 +12,7 @@ class BracketRangeQuery
         int close;
     };
 
+private:
     static S op(S a, S b)
     {
         int x = min(a.open, b.close);
@@ -49,22 +51,30 @@ public:
         s[i] = c;
     }
 
+    // [l, r) の括弧列情報を取得
+    S prod(int l, int r)
+    {
+        assert(0 <= l && l <= r && r <= n);
+        return seg.prod(l, r);
+    }
+
     // [l, r) が正しい括弧列か？
     bool is_valid(int l, int r)
     {
-        assert(0 <= l && l <= r && r <= n);
-        S x = seg.prod(l, r);
+        S x = prod(l, r);
         return x.open == 0 && x.close == 0;
     }
 
     // [l, r) で正しく対応付けられる括弧ペアの最大数
     int count_matched_pairs(int l, int r)
     {
-        assert(0 <= l && l <= r && r <= n);
-        return seg.prod(l, r).matched;
+        return prod(l, r).matched;
     }
 
-    const string &str() const { return s; }
+    const string &str() const
+    {
+        return s;
+    }
 
 private:
     int n;
