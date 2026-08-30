@@ -1,30 +1,32 @@
 #include <bits/stdc++.h>
-#include <atcoder/lazysegtree>
+#include <atcoder/segtree>
 using namespace std;
 
 class BracketRangeQuery
 {
-    using S = int;
-    using F = int;
-
-    static constexpr int INF = (int)1e9;
-
-    static S op(S a, S b) { return min(a, b); }
-    static S e() { return INF; }
-
-    static S mapping(F f, S x)
+    struct S
     {
-        return x == INF ? INF : x + f;
+        int matched;
+        int open;
+        int close;
+    };
+
+    static S op(S a, S b)
+    {
+        int x = min(a.open, b.close);
+        return {
+            a.matched + b.matched + x,
+            a.open + b.open - x,
+            a.close + b.close - x,
+        };
     }
 
-    static F composition(F f, F g)
+    static S e()
     {
-        return f + g;
+        return {0, 0, 0};
     }
 
-    static F id() { return 0; }
-
-    using seg_t = atcoder::lazy_segtree<S, op, e, F, mapping, composition, id>;
+    using seg_t = atcoder::segtree<S, op, e>;
 
 public:
     BracketRangeQuery() : n(0), seg() {}
@@ -43,7 +45,7 @@ public:
     void set(int i, char c)
     {
         assert(0 <= i && i < n);
-        seg.apply(i + 1, n + 1, conv(c) - conv(s[i]));
+        seg.set(i, make_node(c));
         s[i] = c;
     }
 
@@ -51,17 +53,15 @@ public:
     bool is_valid(int l, int r)
     {
         assert(0 <= l && l <= r && r <= n);
+        S x = seg.prod(l, r);
+        return x.open == 0 && x.close == 0;
+    }
 
-        int base = seg.get(l);
-        int right = seg.get(r);
-
-        if (right - base != 0)
-            return false;
-        if (l == r)
-            return true;
-
-        int mn = seg.prod(l + 1, r + 1);
-        return mn >= base;
+    // [l, r) で正しく対応付けられる括弧ペアの最大数
+    int count_matched_pairs(int l, int r)
+    {
+        assert(0 <= l && l <= r && r <= n);
+        return seg.prod(l, r).matched;
     }
 
     const string &str() const { return s; }
@@ -71,25 +71,26 @@ private:
     string s;
     seg_t seg;
 
-    static int conv(char c)
+    static S make_node(char c)
     {
         if (c == '(')
-            return +1;
+            return {0, 1, 0};
         if (c == ')')
-            return -1;
-        return 0; // 括弧以外は寄与なし
+            return {0, 0, 1};
+        return {0, 0, 0}; // 括弧以外は寄与なし
     }
 
     void init(const string &s_)
     {
         s = s_;
         n = (int)s.size();
-        vector<S> pref(n + 1);
-        pref[0] = 0;
+
+        vector<S> v(n);
         for (int i = 0; i < n; ++i)
         {
-            pref[i + 1] = pref[i] + conv(s[i]);
+            v[i] = make_node(s[i]);
         }
-        seg = seg_t(pref);
+
+        seg = seg_t(v);
     }
 };
